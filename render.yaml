@@ -1,0 +1,11 @@
+# Blueprint de Render: deploy con "New +" > "Blueprint" apuntando a este repo,
+# o crea un Web Service manual con buildCommand npm install / startCommand npm start.
+services:
+  - type: web
+    name: catan
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true

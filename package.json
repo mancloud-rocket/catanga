@@ -1,0 +1,21 @@
+{
+  "name": "catan",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Catan multiplayer local - vibecodeado",
+  "main": "server/index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node test/run-all.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "socket.io": "^4.8.0"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.3"
+  }
+}

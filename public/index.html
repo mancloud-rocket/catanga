@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CATAN</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== Pantalla de inicio ===== -->
+<div id="screen-home" class="screen active">
+  <div class="cine-bg" aria-hidden="true">
+    <div class="sky"></div>
+    <div class="sun-glow"></div>
+    <svg class="birds" viewBox="0 0 120 40">
+      <path d="M10 20 q5 -6 10 0 q5 -6 10 0" class="bird b1"/>
+      <path d="M55 12 q4 -5 8 0 q4 -5 8 0" class="bird b2"/>
+      <path d="M90 26 q3 -4 6 0 q3 -4 6 0" class="bird b3"/>
+    </svg>
+    <div class="cloud cloud-a"><svg viewBox="0 0 220 70"><g fill="currentColor"><ellipse cx="60" cy="45" rx="55" ry="20"/><ellipse cx="110" cy="35" rx="45" ry="24"/><ellipse cx="160" cy="48" rx="50" ry="17"/></g></svg></div>
+    <div class="cloud cloud-b"><svg viewBox="0 0 220 70"><g fill="currentColor"><ellipse cx="70" cy="45" rx="60" ry="18"/><ellipse cx="130" cy="36" rx="48" ry="22"/></g></svg></div>
+    <div class="cloud cloud-c"><svg viewBox="0 0 220 70"><g fill="currentColor"><ellipse cx="80" cy="45" rx="65" ry="16"/><ellipse cx="140" cy="38" rx="40" ry="19"/></g></svg></div>
+
+    <div class="ocean">
+      <div class="wave-layer wave-1"></div>
+      <div class="island island-l">
+        <svg viewBox="-160 -140 320 260">
+          <defs>
+            <polygon id="mh" points="24.2,-14 24.2,14 0,28 -24.2,14 -24.2,-14 0,-28"/>
+          </defs>
+          <ellipse cx="0" cy="86" rx="130" ry="18" fill="rgba(6,40,60,0.45)"/>
+          <polygon points="105,-14 105,50 52,86 0,98 -52,86 -105,50 -105,-14 -52,-72 0,-84 52,-72"
+                   fill="#d9c48c" stroke="#b39a5e" stroke-width="4" opacity="0.98"/>
+          <g stroke="rgba(40,25,10,0.35)" stroke-width="1.6">
+            <use href="#mh" fill="#e8d9a8"/>
+            <use href="#mh" transform="translate(48.5,0)" fill="#2f6b35"/>
+            <use href="#mh" transform="translate(-48.5,0)" fill="#cf7440"/>
+            <use href="#mh" transform="translate(24.2,-42)" fill="#e9c33f"/>
+            <use href="#mh" transform="translate(-24.2,-42)" fill="#9aa5ad"/>
+            <use href="#mh" transform="translate(24.2,42)" fill="#a8cf5e"/>
+            <use href="#mh" transform="translate(-24.2,42)" fill="#2f6b35"/>
+          </g>
+          <polygon points="-24.2,-56 -18,-47 -30,-47" fill="#e8edf0"/>
+          <circle cx="48.5" cy="-6" r="3.4" fill="#174a20"/>
+          <circle cx="42" cy="4" r="3" fill="#1e5c28"/>
+          <circle cx="55" cy="5" r="2.7" fill="#1e5c28"/>
+        </svg>
+      </div>
+      <div class="wave-layer wave-2"></div>
+      <div class="wave-layer wave-3"></div>
+    </div>
+    <div class="vignette"></div>
+  </div>
+
+  <div class="home-card cine-card">
+    <h1 class="game-title">CATAN</h1>
+    <p class="subtitle">Partida online entre amigos</p>
+    <input id="input-name" type="text" maxlength="16" placeholder="Tu nombre" autocomplete="off">
+    <button id="btn-create" class="btn btn-primary">Crear partida</button>
+    <div class="join-row">
+      <input id="input-code" type="text" maxlength="4" placeholder="CODIGO" autocomplete="off">
+      <button id="btn-join" class="btn">Unirse</button>
+    </div>
+    <p id="home-error" class="error-msg"></p>
+  </div>
+</div>
+
+<!-- ===== Lobby ===== -->
+<div id="screen-lobby" class="screen">
+  <div class="cine-bg" aria-hidden="true">
+    <div class="sky"></div>
+    <div class="sun-glow"></div>
+    <div class="cloud cloud-a"><svg viewBox="0 0 220 70"><g fill="currentColor"><ellipse cx="60" cy="45" rx="55" ry="20"/><ellipse cx="110" cy="35" rx="45" ry="24"/><ellipse cx="160" cy="48" rx="50" ry="17"/></g></svg></div>
+    <div class="cloud cloud-c"><svg viewBox="0 0 220 70"><g fill="currentColor"><ellipse cx="80" cy="45" rx="65" ry="16"/><ellipse cx="140" cy="38" rx="40" ry="19"/></g></svg></div>
+    <div class="ocean">
+      <div class="wave-layer wave-1"></div>
+      <div class="wave-layer wave-2"></div>
+      <div class="wave-layer wave-3"></div>
+    </div>
+    <div class="vignette"></div>
+  </div>
+  <div class="home-card cine-card">
+    <h1 class="game-title small">CATAN</h1>
+    <p class="subtitle">Codigo de sala</p>
+    <div id="lobby-code" class="room-code">----</div>
+    <p class="subtitle">Comparti este codigo (o el link) con tus amigos</p>
+    <div id="lobby-players" class="lobby-players"></div>
+    <button id="btn-start" class="btn btn-primary" style="display:none">Empezar partida</button>
+    <p id="lobby-hint" class="subtitle"></p>
+    <button id="btn-leave" class="btn btn-ghost">Salir</button>
+  </div>
+</div>
+
+<!-- ===== Juego ===== -->
+<div id="screen-game" class="screen">
+  <div class="game-layout">
+
+    <div class="side-left">
+      <div id="opponents"></div>
+      <div class="bank-panel panel">
+        <div class="panel-title">Banco</div>
+        <div id="bank-info" class="bank-info"></div>
+        <div id="deck-info" class="deck-info"></div>
+        <div id="awards-info" class="awards-info"></div>
+      </div>
+    </div>
+
+    <div class="board-wrap">
+      <div id="board-container"></div>
+      <div id="dice-area" class="dice-area"></div>
+      <div id="status-banner" class="status-banner"></div>
+    </div>
+
+    <div class="side-right">
+      <div class="panel log-panel">
+        <div class="panel-title">Historial</div>
+        <div id="game-log" class="game-log"></div>
+      </div>
+      <div class="panel chat-panel">
+        <div id="chat-log" class="chat-log"></div>
+        <div class="chat-input-row">
+          <input id="chat-input" type="text" maxlength="200" placeholder="Escribir...">
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <div id="my-info" class="my-info"></div>
+      <div id="my-hand" class="my-hand"></div>
+      <div id="my-devcards" class="my-devcards"></div>
+      <div id="actions" class="actions"></div>
+    </div>
+
+  </div>
+
+  <!-- Modal generico -->
+  <div id="modal-overlay" class="modal-overlay" style="display:none">
+    <div id="modal-box" class="modal-box"></div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="board.js"></script>
+<script src="client.js"></script>
+</body>
+</html>
