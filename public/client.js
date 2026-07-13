@@ -39,6 +39,9 @@
   function showScreen(name) {
     for (const s of document.querySelectorAll('.screen')) s.classList.remove('active');
     $(`screen-${name}`).classList.add('active');
+    // Escena 3D del home/lobby (module que puede cargar despues que este script)
+    if (window.Home3D) window.Home3D.onScreenChange(name);
+    else (window.__home3dQueue = window.__home3dQueue || []).push(name);
   }
 
   function toast(msg) {

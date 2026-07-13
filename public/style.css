@@ -523,6 +523,39 @@ input[type="text"]:focus { border-color: var(--red-catan); }
     linear-gradient(180deg, var(--parchment) 0%, var(--parchment-dark) 100%);
 }
 
+/* ===== Escena 3D (home/lobby) ===== */
+
+#home3d-canvas {
+  position: fixed; inset: 0; z-index: 0;
+  display: none;
+  pointer-events: none;
+}
+body.has-3d #home3d-canvas { display: block; }
+/* Con 3D activo, el fondo CSS 2D se apaga (la vignette se reusa sobre el canvas) */
+body.has-3d #screen-home .cine-bg > :not(.vignette),
+body.has-3d #screen-lobby .cine-bg > :not(.vignette) { display: none; }
+/* GSAP toma el control de la entrada de la card */
+body.has-3d .home-card { animation: none; }
+
+.fab-3d {
+  position: fixed; z-index: 60;
+  width: 46px; height: 46px; border-radius: 50%;
+  border: 2px solid #7d5a2c;
+  background: rgba(43, 26, 10, 0.82);
+  color: #ffe9b0;
+  font-size: 19px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.45);
+  transition: transform 0.12s, background 0.12s;
+}
+.fab-3d:hover { transform: scale(1.08); background: rgba(63, 40, 18, 0.92); }
+#btn-mute { left: 18px; bottom: 18px; }
+#btn-skip-intro {
+  right: 18px; bottom: 18px;
+  width: auto; border-radius: 24px; padding: 0 20px; height: 44px;
+  font-family: inherit; font-weight: bold; font-size: 14px;
+}
+
 /* Scrollbars */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: rgba(0,0,0,0.08); }
