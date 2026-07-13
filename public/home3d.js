@@ -276,13 +276,13 @@ function buildIsland() {
   islandGroup.position.set(-14, 0.35, -5);
   islandGroup.scale.setScalar(0.65);
 
-  // --- Base de arena con costa irregular ---
-  const baseGeo = new THREE.CylinderGeometry(13.8, 16.2, 1.7, 64, 1);
+  // --- Base de arena con costa irregular y suave ---
+  const baseGeo = new THREE.CylinderGeometry(13.8, 16.2, 1.7, 160, 1);
   const pos = baseGeo.attributes.position;
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i), z = pos.getZ(i);
     const ang = Math.atan2(z, x);
-    const wob = 1 + Math.sin(ang * 5 + 1.3) * 0.05 + Math.sin(ang * 9 + 4.1) * 0.035;
+    const wob = 1 + Math.sin(ang * 4 + 1.3) * 0.045 + Math.sin(ang * 7 + 4.1) * 0.025;
     pos.setX(i, x * wob);
     pos.setZ(i, z * wob);
   }
@@ -300,11 +300,11 @@ function buildIsland() {
     color: 0xffffff, transparent: true, opacity: 0.35,
     depthWrite: false, side: THREE.DoubleSide,
   });
-  const foam1 = new THREE.Mesh(new THREE.RingGeometry(15.6, 17.4, 64), foamMat);
+  const foam1 = new THREE.Mesh(new THREE.RingGeometry(15.6, 17.4, 128), foamMat);
   foam1.rotation.x = -Math.PI / 2;
   foam1.position.y = -0.42; // apenas sobre el agua (grupo en y=0.35, escala 0.65)
   islandGroup.add(foam1);
-  const foam2 = new THREE.Mesh(new THREE.RingGeometry(17.8, 18.6, 64), foamMat.clone());
+  const foam2 = new THREE.Mesh(new THREE.RingGeometry(17.8, 18.6, 128), foamMat.clone());
   foam2.material.opacity = 0.15;
   foam2.rotation.x = -Math.PI / 2;
   foam2.position.y = -0.44;
@@ -362,9 +362,9 @@ function buildTileDeco(rng, tileTopY) {
   const pineCells = cellsOf('forest');
   const pinesPerTile = Math.round(7 * detail);
   const pineCount = pineCells.length * pinesPerTile;
-  const trunkGeo = new THREE.CylinderGeometry(0.09, 0.13, 0.5, 5);
-  const conesGeo = new THREE.ConeGeometry(0.55, 1.4, 6);
-  const cone2Geo = new THREE.ConeGeometry(0.4, 1.0, 6);
+  const trunkGeo = new THREE.CylinderGeometry(0.09, 0.13, 0.5, 8);
+  const conesGeo = new THREE.ConeGeometry(0.55, 1.4, 10);
+  const cone2Geo = new THREE.ConeGeometry(0.4, 1.0, 10);
   const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5a3a1e, roughness: 1 });
   const pineMat = new THREE.MeshStandardMaterial({ color: 0x1d4f26, roughness: 0.9 });
   const pine2Mat = new THREE.MeshStandardMaterial({ color: 0x276333, roughness: 0.9 });
@@ -388,28 +388,41 @@ function buildTileDeco(rng, tileTopY) {
   }
   for (const im of [trunks, cones, cones2]) { im.castShadow = true; islandGroup.add(im); }
 
-  // --- Montañas: icosaedros deformados + nieve ---
+  // --- Montañas: conos desplazados con normales suaves + nieve ---
   const mtnCells = cellsOf('mountains');
   const rocksPerTile = 2;
-  const rockGeo = new THREE.IcosahedronGeometry(1.05, 0);
-  rockGeo.scale(1, 1.6, 1);
-  const rockMat = new THREE.MeshStandardMaterial({ color: 0x76828c, roughness: 0.95, flatShading: true });
+  const rockGeo = new THREE.ConeGeometry(1.2, 2.4, 16, 8);
+  {
+    // desplaza los vertices con ruido senoidal (respetando la punta y la base)
+    const rp = rockGeo.attributes.position;
+    for (let i = 0; i < rp.count; i++) {
+      const x = rp.getX(i), y = rp.getY(i), z = rp.getZ(i);
+      const ang = Math.atan2(z, x);
+      const hFactor = 1 - Math.abs(y) / 1.25; // 0 en punta/base, 1 al medio
+      const n = (Math.sin(ang * 3 + y * 2.2) * 0.12 + Math.sin(ang * 6 + 1.7) * 0.07) * Math.max(0, hFactor);
+      rp.setX(i, x * (1 + n));
+      rp.setZ(i, z * (1 + n));
+    }
+    rockGeo.computeVertexNormals();
+  }
+  const rockMat = new THREE.MeshStandardMaterial({ color: 0x7d8a93, roughness: 0.95 });
   const rocks = new THREE.InstancedMesh(rockGeo, rockMat, mtnCells.length * rocksPerTile);
-  const snowGeo = new THREE.ConeGeometry(0.42, 0.6, 5);
-  const snowMat = new THREE.MeshStandardMaterial({ color: 0xe8edf0, roughness: 0.6, flatShading: true });
+  const snowGeo = new THREE.ConeGeometry(0.4, 0.62, 16);
+  const snowMat = new THREE.MeshStandardMaterial({ color: 0xe8edf0, roughness: 0.6 });
   const snows = new THREE.InstancedMesh(snowGeo, snowMat, mtnCells.length);
   let ri = 0, si = 0;
   for (const cell of mtnCells) {
     for (let k = 0; k < rocksPerTile; k++) {
-      const p = jitterOnTile(cell, HEX * 0.4);
-      const s = 0.8 + rng() * 0.5;
+      const p = jitterOnTile(cell, HEX * 0.38);
+      const s = 0.75 + rng() * 0.5;
       m.makeRotationY(rng() * Math.PI);
       m.scale(new THREE.Vector3(s, s, s));
-      m.setPosition(p.x, p.top + 0.75 * s, p.z);
+      m.setPosition(p.x, p.top + 1.2 * s, p.z);
       rocks.setMatrixAt(ri++, m);
       if (k === 0) {
+        // gorro de nieve sobre la punta del pico grande
         m.makeRotationY(rng() * Math.PI);
-        m.setPosition(p.x, p.top + 1.85 * s, p.z);
+        m.setPosition(p.x, p.top + 2.4 * s - 0.22, p.z);
         snows.setMatrixAt(si++, m);
       }
     }
@@ -439,7 +452,7 @@ function buildTileDeco(rng, tileTopY) {
   // --- Ovejas ---
   const pastCells = cellsOf('pasture');
   const sheepPerTile = Math.max(1, Math.round(2 * detail));
-  const sheepGeo = new THREE.SphereGeometry(0.28, 8, 6);
+  const sheepGeo = new THREE.SphereGeometry(0.28, 14, 10);
   sheepGeo.scale(1.35, 1, 1);
   const sheepMat = new THREE.MeshStandardMaterial({ color: 0xf4f1e6, roughness: 1 });
   const sheep = new THREE.InstancedMesh(sheepGeo, sheepMat, pastCells.length * sheepPerTile);
@@ -604,41 +617,112 @@ function buildClouds() {
   });
 }
 
+// Gaviota: cuerpo + cabeza + alas curvas con punta oscura, montadas en
+// pivotes de hombro para aletear. Silueta real de gaviota vista desde abajo.
+function makeGullWing(bodyMat, tipMat) {
+  // Ala en el plano XY (x = hacia afuera, y = adelante), luego acostada a XZ
+  const shape = new THREE.Shape();
+  shape.moveTo(0.15, 0.05);
+  shape.bezierCurveTo(0.8, 0.35, 1.4, 0.42, 1.9, 0.3);
+  shape.bezierCurveTo(2.5, 0.16, 2.9, 0.0, 3.1, -0.18);
+  shape.bezierCurveTo(2.7, -0.14, 2.3, -0.12, 1.9, -0.16);
+  shape.bezierCurveTo(1.3, -0.22, 0.7, -0.28, 0.15, -0.25);
+  shape.closePath();
+  const geo = new THREE.ShapeGeometry(shape, 10);
+  geo.rotateX(-Math.PI / 2); // acostada: x afuera, z adelante
+
+  // punta oscura (ultimo tercio del ala)
+  const tipShape = new THREE.Shape();
+  tipShape.moveTo(2.15, 0.22);
+  tipShape.bezierCurveTo(2.5, 0.16, 2.9, 0.0, 3.1, -0.18);
+  tipShape.bezierCurveTo(2.8, -0.15, 2.45, -0.13, 2.15, -0.15);
+  tipShape.closePath();
+  const tipGeo = new THREE.ShapeGeometry(tipShape, 6);
+  tipGeo.rotateX(-Math.PI / 2);
+  tipGeo.translate(0, 0.005, 0);
+
+  const wing = new THREE.Group();
+  wing.add(new THREE.Mesh(geo, bodyMat));
+  wing.add(new THREE.Mesh(tipGeo, tipMat));
+  return wing;
+}
+
+function makeGull(wingMat, tipMat, bodyMat) {
+  const gull = new THREE.Group();
+
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.34, 12, 9), bodyMat);
+  body.scale.set(0.55, 0.42, 1.35);
+  gull.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.15, 10, 8), bodyMat);
+  head.position.set(0, 0.1, 0.48);
+  gull.add(head);
+  const tail = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.42, 8), bodyMat);
+  tail.rotation.x = Math.PI / 2;
+  tail.scale.set(1.6, 1, 0.4);
+  tail.position.set(0, 0.02, -0.55);
+  gull.add(tail);
+
+  const wingL = new THREE.Group();
+  wingL.add(makeGullWing(wingMat, tipMat));
+  wingL.position.set(0.1, 0.06, 0.05);
+  gull.add(wingL);
+
+  const wingR = new THREE.Group();
+  const wr = makeGullWing(wingMat, tipMat);
+  wr.scale.x = -1;
+  wingR.add(wr);
+  wingR.position.set(-0.1, 0.06, 0.05);
+  gull.add(wingR);
+
+  gull.userData.wings = { l: wingL, r: wingR };
+  gull.rotation.order = 'YXZ';
+  return gull;
+}
+
 function buildBirds() {
-  const birdGeo = new THREE.BufferGeometry();
-  // pajaro en "V": dos triangulos
-  birdGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
-    0, 0, 0, -1.0, 0.35, 0.15, -0.9, 0.0, 0.35,
-    0, 0, 0, 1.0, 0.35, 0.15, 0.9, 0.0, 0.35,
-  ]), 3));
-  birdGeo.computeVertexNormals();
-  const birdMat = new THREE.MeshBasicMaterial({ color: 0x142b3a, side: THREE.DoubleSide, fog: false });
+  const wingMat = new THREE.MeshBasicMaterial({ color: 0xdfe6ea, side: THREE.DoubleSide, fog: false });
+  const tipMat = new THREE.MeshBasicMaterial({ color: 0x5f6c76, side: THREE.DoubleSide, fog: false });
+  const bodyMat = new THREE.MeshBasicMaterial({ color: 0xf2f5f7, fog: false });
 
   const flocks = [
-    { cx: -14, cz: -5, r: 16, h: 12, speed: 0.16, n: 3 },
-    { cx: 8, cz: -25, r: 22, h: 16, speed: -0.11, n: 2 },
+    { cx: -14, cz: -5, r: 15, h: 13, speed: 0.14, n: 3 },
+    { cx: 6, cz: -30, r: 24, h: 18, speed: -0.1, n: 3 },
   ];
-  const birds = [];
+  const gulls = [];
   for (const f of flocks) {
     for (let i = 0; i < f.n; i++) {
-      const b = new THREE.Mesh(birdGeo, birdMat);
-      b.scale.setScalar(0.6);
-      b.userData = { ...f, phase: (i / f.n) * Math.PI * 2 };
-      scene.add(b);
-      birds.push(b);
+      const g = makeGull(wingMat, tipMat, bodyMat);
+      g.scale.setScalar(0.75 + (i % 3) * 0.12);
+      g.userData.orbit = { ...f, phase: (i / f.n) * Math.PI * 2 + f.cx };
+      g.userData.flap = { speed: 6.5 + i * 0.7, phase: i * 1.7, glide: i * 2.3 };
+      scene.add(g);
+      gulls.push(g);
     }
   }
+
   updaters.push((t) => {
-    for (const b of birds) {
-      const u = b.userData;
-      const a = t * u.speed + u.phase;
-      b.position.set(
-        u.cx + Math.cos(a) * u.r,
-        u.h + Math.sin(t * 0.7 + u.phase) * 1.2,
-        u.cz + Math.sin(a) * u.r
+    for (const g of gulls) {
+      const o = g.userData.orbit;
+      const f = g.userData.flap;
+      const a = t * o.speed + o.phase;
+
+      g.position.set(
+        o.cx + Math.cos(a) * o.r,
+        o.h + Math.sin(t * 0.5 + o.phase) * 1.4,
+        o.cz + Math.sin(a) * o.r
       );
-      b.rotation.y = -a - Math.PI / 2 * Math.sign(u.speed);
-      b.scale.y = 0.6 * (0.55 + Math.abs(Math.sin(t * 7 + u.phase)) * 0.7); // aleteo
+      // orientacion: tangente a la orbita + banking hacia el centro del giro
+      g.rotation.y = -a + (o.speed > 0 ? 0 : Math.PI);
+      g.rotation.z = 0.22 * Math.sign(o.speed);
+      g.rotation.x = Math.sin(t * 0.5 + o.phase) * 0.08; // cabeceo suave
+
+      // aleteo en rafagas: plana casi siempre, aletea unos segundos y repite
+      const burst = Math.max(0, Math.sin(t * 0.28 + f.glide));
+      const amp = 0.06 + burst * burst * 0.7;
+      const flap = Math.sin(t * f.speed + f.phase) * amp;
+      const dihedral = 0.14 * (1 - burst); // alas en V leve al planear
+      g.userData.wings.l.rotation.z = flap + dihedral;
+      g.userData.wings.r.rotation.z = -flap - dihedral;
     }
   });
 }
@@ -656,10 +740,10 @@ function setupParallax() {
   });
   updaters.push((t, dt) => {
     idleTime += dt;
-    const drift = idleTime > 3 ? Math.sin(t * 0.15) * 0.5 : 0;
-    const targetX = IS_TOUCH ? drift : mouseX * 1.8 + drift;
-    const targetY = IS_TOUCH ? 0 : mouseY * 0.9;
-    const k = Math.min(1, dt * 2.5);
+    const drift = idleTime > 3 ? Math.sin(t * 0.15) * 0.7 : 0;
+    const targetX = IS_TOUCH ? drift : mouseX * 3.4 + drift;
+    const targetY = IS_TOUCH ? 0 : mouseY * 1.7;
+    const k = Math.min(1, dt * 3.2);
     parallaxX += (targetX - parallaxX) * k;
     parallaxY += (targetY - parallaxY) * k;
   });

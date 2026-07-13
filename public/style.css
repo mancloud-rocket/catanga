@@ -523,6 +523,19 @@ input[type="text"]:focus { border-color: var(--red-catan); }
     linear-gradient(180deg, var(--parchment) 0%, var(--parchment-dark) 100%);
 }
 
+/* ===== Cursor de manito (toda la app) ===== */
+
+body {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cg stroke='%233a2a18' stroke-width='1.1' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath fill='%23f6ead0' d='M11.2 26 C9.4 26 8.2 25 7.4 23.4 L4.8 18.2 C4.2 17 4.6 15.8 5.6 15.3 C6.5 14.8 7.6 15.1 8.3 16.1 L9.5 17.8 L9.5 5.4 C9.5 4.1 10.4 3.2 11.5 3.2 C12.6 3.2 13.5 4.1 13.5 5.4 L13.5 12.2 L14.6 12.0 C15.6 11.8 16.5 12.4 16.8 13.3 L17.0 13.9 C17.8 13.6 18.8 13.9 19.3 14.7 L19.5 15.1 C20.4 14.9 21.4 15.4 21.7 16.3 L22.6 19.6 C23.3 22.3 21.8 25 19.2 25.8 C18.5 26 17.7 26 16.9 26 Z'/%3E%3C/g%3E%3C/svg%3E") 11 3, auto;
+}
+
+button, .btn, input[type="text"], a, label,
+.dev-card, .res-card, .picker-card, .stepper button,
+.lobby-player, .fab-3d,
+[cursor="pointer"], svg [cursor="pointer"] {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cg stroke='%233a2a18' stroke-width='1.1' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath fill='%23ffe9b0' d='M11.2 26 C9.4 26 8.2 25 7.4 23.4 L4.8 18.2 C4.2 17 4.6 15.8 5.6 15.3 C6.5 14.8 7.6 15.1 8.3 16.1 L9.5 17.8 L9.5 5.4 C9.5 4.1 10.4 3.2 11.5 3.2 C12.6 3.2 13.5 4.1 13.5 5.4 L13.5 12.2 L14.6 12.0 C15.6 11.8 16.5 12.4 16.8 13.3 L17.0 13.9 C17.8 13.6 18.8 13.9 19.3 14.7 L19.5 15.1 C20.4 14.9 21.4 15.4 21.7 16.3 L22.6 19.6 C23.3 22.3 21.8 25 19.2 25.8 C18.5 26 17.7 26 16.9 26 Z'/%3E%3C/g%3E%3C/svg%3E") 11 3, pointer;
+}
+
 /* ===== Escena 3D (home/lobby) ===== */
 
 #home3d-canvas {
