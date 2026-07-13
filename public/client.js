@@ -63,14 +63,20 @@
 
   // ---------- Home ----------
 
-  $('btn-create').addEventListener('click', () => {
-    const name = $('input-name').value.trim();
-    if (!name) return ($('home-error').textContent = 'Pone tu nombre primero.');
+  function doCreateRoom(name) {
     socket.emit('createRoom', { name }, (res) => {
       if (!res.ok) return ($('home-error').textContent = res.error);
       saveSession(res.code, res.token, name);
       showScreen('lobby');
     });
+  }
+
+  $('btn-create').addEventListener('click', () => {
+    const name = $('input-name').value.trim();
+    if (!name) return ($('home-error').textContent = 'Pone tu nombre primero.');
+    // Verificacion de seguridad (?): hay que atar a Gaston primero
+    if (window.GastonCaptcha) window.GastonCaptcha.show(() => doCreateRoom(name));
+    else doCreateRoom(name);
   });
 
   $('btn-join').addEventListener('click', joinFromInput);

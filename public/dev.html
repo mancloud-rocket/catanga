@@ -147,6 +147,7 @@ window.io = function () {
 </script>
 <script src="/vendor/gsap.min.js"></script>
 <script src="board.js"></script>
+<script src="captcha.js"></script>
 <script src="client.js"></script>
 <script type="module" src="home3d.js"></script>
 <script>
@@ -161,6 +162,12 @@ fetch('dev-state.json').then((r) => r.json()).then((state) => {
   if (q === 'home') {
     document.getElementById('screen-home').classList.add('active');
     notify3d('home');
+    return;
+  }
+  if (q === 'captcha') {
+    document.getElementById('screen-home').classList.add('active');
+    notify3d('home');
+    window.GastonCaptcha.show(() => console.log('captcha OK'));
     return;
   }
   if (q === 'lobby') {

@@ -749,6 +749,225 @@ function setupParallax() {
   });
 }
 
+// ---------- Potas voladoras (homenaje a Gaston) ----------
+
+const POTION_LABELS = ['POTA LOCA', 'TOMATE UNA POTA'];
+const potions = [];
+const droplets = [];
+
+function makePotionLabel(text) {
+  const c = document.createElement('canvas');
+  c.width = 256;
+  c.height = 128;
+  const g = c.getContext('2d');
+  g.fillStyle = '#f3e5c3';
+  g.fillRect(0, 0, 256, 128);
+  g.strokeStyle = '#8a6534';
+  g.lineWidth = 8;
+  g.strokeRect(6, 6, 244, 116);
+  g.fillStyle = '#a32c22';
+  g.font = '900 34px Georgia';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  const words = text.split(' ');
+  if (words.length > 2) {
+    g.fillText(words.slice(0, 2).join(' '), 128, 44);
+    g.fillText(words.slice(2).join(' '), 128, 86);
+  } else if (words.length === 2) {
+    g.fillText(words[0], 128, 44);
+    g.fillText(words[1], 128, 86);
+  } else {
+    g.fillText(text, 128, 64);
+  }
+  return new THREE.CanvasTexture(c);
+}
+
+// Botella fiel a la referencia: esfera de vidrio, liquido verde, corcho
+// grande, soga con puntas negras y medallon dorado con gema azul.
+function makePotion(labelText) {
+  const potion = new THREE.Group();
+
+  // vidrio con alpha clasico: consistente en cualquier GPU (sin transmission)
+  const glassMat = new THREE.MeshPhysicalMaterial({
+    color: 0xd6ecf2, transparent: true, opacity: 0.26,
+    roughness: 0.05, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.08,
+    depthWrite: false,
+  });
+  const glass = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 22), glassMat);
+  glass.renderOrder = 1;
+  potion.add(glass);
+
+  const liquid = new THREE.Mesh(
+    new THREE.SphereGeometry(0.82, 22, 18),
+    new THREE.MeshStandardMaterial({
+      color: 0x35c05a, roughness: 0.3,
+      emissive: 0x1d8f3c, emissiveIntensity: 0.55,
+      transparent: true, opacity: 0.92,
+    })
+  );
+  liquid.scale.y = 0.88;
+  liquid.position.y = -0.12;
+  potion.add(liquid);
+  // brillo especular del liquido (medialuna clara arriba)
+  const gloss = new THREE.Mesh(
+    new THREE.SphereGeometry(0.55, 16, 12),
+    new THREE.MeshBasicMaterial({ color: 0x8fe8a8, transparent: true, opacity: 0.35 })
+  );
+  gloss.scale.set(1, 0.5, 1);
+  gloss.position.set(-0.15, 0.28, 0.25);
+  potion.add(gloss);
+
+  // cuello + corcho + tapa
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.4, 0.35, 16), glassMat);
+  neck.position.y = 1.05;
+  potion.add(neck);
+  const corkMat = new THREE.MeshStandardMaterial({
+    color: 0xc08a5e, roughness: 0.9, emissive: 0x3a2113, emissiveIntensity: 0.25,
+  });
+  const cork = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.3, 0.35, 14), corkMat);
+  cork.position.y = 1.32;
+  potion.add(cork);
+  const cap = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.42, 0.38, 0.26, 16),
+    new THREE.MeshStandardMaterial({
+      color: 0xa9714f, roughness: 0.85, emissive: 0x2e1a0e, emissiveIntensity: 0.25,
+    })
+  );
+  cap.position.y = 1.56;
+  potion.add(cap);
+
+  // soga alrededor del cuello con dos puntas
+  const ropeMat = new THREE.MeshStandardMaterial({ color: 0xd9b98a, roughness: 1 });
+  const rope = new THREE.Mesh(new THREE.TorusGeometry(0.44, 0.09, 8, 24), ropeMat);
+  rope.rotation.x = Math.PI / 2 + 0.18;
+  rope.position.y = 0.98;
+  potion.add(rope);
+  const tipMat = new THREE.MeshStandardMaterial({ color: 0x1c1c22, roughness: 0.7 });
+  for (const side of [-1, 1]) {
+    const end = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.5, 8), ropeMat);
+    end.position.set(side * 0.72, 0.88, 0.1);
+    end.rotation.z = side * 1.15;
+    potion.add(end);
+    const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.11, 0.18, 8), tipMat);
+    tip.position.set(side * 0.95, 0.78, 0.1);
+    tip.rotation.z = side * 1.15;
+    potion.add(tip);
+  }
+
+  // medallon dorado con gema azul
+  const medal = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.2, 0.2, 0.06, 6),
+    new THREE.MeshStandardMaterial({ color: 0xd8a93c, roughness: 0.35, metalness: 0.8 })
+  );
+  medal.rotation.x = Math.PI / 2;
+  medal.position.set(0, 0.72, 0.72);
+  potion.add(medal);
+  const gem = new THREE.Mesh(
+    new THREE.OctahedronGeometry(0.13, 0),
+    new THREE.MeshPhysicalMaterial({
+      color: 0x1a4fd6, roughness: 0.1, metalness: 0.2,
+      emissive: 0x0a2a80, emissiveIntensity: 0.5,
+    })
+  );
+  gem.position.set(0, 0.72, 0.78);
+  potion.add(gem);
+
+  // etiqueta POTA LOCA
+  const label = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.85, 0.42),
+    new THREE.MeshStandardMaterial({ map: makePotionLabel(labelText), roughness: 0.9 })
+  );
+  label.position.set(0, -0.25, 0.94);
+  label.rotation.x = -0.22;
+  potion.add(label);
+
+  return potion;
+}
+
+function spawnDroplet(pos, vel) {
+  let d = droplets.find((dd) => !dd.alive);
+  if (!d) {
+    if (droplets.length >= (LOW_DETAIL ? 8 : 18)) return;
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.09, 8, 6),
+      new THREE.MeshStandardMaterial({
+        color: 0x2fae4e, emissive: 0x1a7d33, emissiveIntensity: 0.5,
+        transparent: true, opacity: 0.9,
+      })
+    );
+    scene.add(mesh);
+    d = { mesh, vel: new THREE.Vector3(), life: 0, alive: false };
+    droplets.push(d);
+  }
+  d.mesh.position.copy(pos);
+  d.vel.copy(vel);
+  d.life = 1.1;
+  d.alive = true;
+  d.mesh.visible = true;
+}
+
+function launchPotion(t) {
+  let p = potions.find((pp) => !pp.alive);
+  if (!p) {
+    if (potions.length >= (LOW_DETAIL ? 1 : 2)) return;
+    p = { group: makePotion(POTION_LABELS[potions.length % 2]), alive: false };
+    scene.add(p.group);
+    potions.push(p);
+  }
+  const dir = Math.random() < 0.5 ? 1 : -1;
+  p.start = new THREE.Vector3(dir * (26 + Math.random() * 8), 3, -22 + Math.random() * 14);
+  p.end = new THREE.Vector3(-dir * (24 + Math.random() * 8), 2.5, 4 + Math.random() * 8);
+  p.peak = 9 + Math.random() * 6;
+  p.t0 = t;
+  p.dur = 6.5 + Math.random() * 2.5;
+  p.spin = new THREE.Vector3(0.8 + Math.random(), 0.5, 1.2 + Math.random() * 0.8);
+  p.nextDrip = 0;
+  p.alive = true;
+  p.group.visible = true;
+  p.group.scale.setScalar(1.15);
+}
+
+function buildPotions() {
+  let nextLaunch = 5.5; // la primera pota vuela despues de la intro
+  updaters.push((t, dt) => {
+    if (t >= nextLaunch) {
+      launchPotion(t);
+      nextLaunch = t + 9 + Math.random() * 6;
+    }
+    for (const p of potions) {
+      if (!p.alive) continue;
+      const u = (t - p.t0) / p.dur;
+      if (u >= 1) {
+        p.alive = false;
+        p.group.visible = false;
+        continue;
+      }
+      p.group.position.lerpVectors(p.start, p.end, u);
+      p.group.position.y += Math.sin(u * Math.PI) * p.peak;
+      p.group.rotation.x += p.spin.x * dt;
+      p.group.rotation.y += p.spin.y * dt;
+      p.group.rotation.z += p.spin.z * dt;
+      // derrame: gotas desde el cuello mientras esta dada vuelta
+      if (t >= p.nextDrip) {
+        p.nextDrip = t + 0.28;
+        const mouth = new THREE.Vector3(0, 1.4, 0).applyQuaternion(p.group.quaternion).add(p.group.position);
+        spawnDroplet(mouth, new THREE.Vector3((Math.random() - 0.5) * 1.5, 1 + Math.random(), (Math.random() - 0.5) * 1.5));
+      }
+    }
+    for (const d of droplets) {
+      if (!d.alive) continue;
+      d.life -= dt;
+      d.vel.y -= 9 * dt;
+      d.mesh.position.addScaledVector(d.vel, dt);
+      d.mesh.material.opacity = Math.max(0, d.life * 0.85);
+      if (d.life <= 0 || d.mesh.position.y < 0.1) {
+        d.alive = false;
+        d.mesh.visible = false;
+      }
+    }
+  });
+}
+
 // ---------- Cinematica de intro (GSAP) ----------
 
 const HOME_CAM = { pos: { x: 2, y: 9, z: 30 }, target: { x: -5, y: 1.6, z: -2 } };
@@ -987,8 +1206,23 @@ function init() {
     buildIsland();
     buildClouds();
     buildBirds();
+    buildPotions();
     setupParallax();
     makeMuteButton();
+
+    // QA visual de las botellas: ?pota=1 planta dos potas quietas en camara
+    if (params.get('pota') === '1') {
+      const p1 = makePotion('POTA LOCA');
+      p1.position.set(6.5, 7, 19);
+      p1.rotation.set(0.15, 0.3, 0.45);
+      p1.scale.setScalar(1.5);
+      scene.add(p1);
+      const p2 = makePotion('TOMATE UNA POTA');
+      p2.position.set(-7.5, 9, 16);
+      p2.rotation.set(-0.2, -0.4, -2.3);
+      p2.scale.setScalar(1.3);
+      scene.add(p2);
+    }
 
     canvas.addEventListener('webglcontextlost', (e) => {
       e.preventDefault();
@@ -1105,6 +1339,8 @@ function disposeScene() {
   camera = null;
   updaters.length = 0;
   cloudMeshes.length = 0;
+  potions.length = 0;
+  droplets.length = 0;
   islandGroup = null;
   water = null;
   stopAudio();

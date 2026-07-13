@@ -569,6 +569,113 @@ body.has-3d .home-card { animation: none; }
   font-family: inherit; font-weight: bold; font-size: 14px;
 }
 
+/* ===== Captcha de Gaston ===== */
+
+.cap-overlay {
+  position: fixed; inset: 0; z-index: 80;
+  background: rgba(20, 10, 4, 0.62);
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(3px);
+  animation: capFade 0.3s ease both;
+}
+@keyframes capFade { from { opacity: 0; } to { opacity: 1; } }
+.cap-box {
+  width: min(520px, 94vw);
+  background: linear-gradient(180deg, var(--parchment), var(--parchment-dark));
+  border: 3px solid #8a6534;
+  border-radius: 14px;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.7);
+  overflow: hidden;
+  animation: capBoxIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes capBoxIn {
+  from { transform: scale(0.86) translateY(26px); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+.cap-head-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: linear-gradient(180deg, #4a7c3a, #3d6830);
+  color: #eef6e8;
+  padding: 12px 16px;
+}
+.cap-shield { font-size: 26px; }
+.cap-title { font-weight: 900; font-size: 16px; letter-spacing: 0.5px; }
+.cap-sub { font-size: 12px; opacity: 0.85; font-style: italic; }
+.cap-task { padding: 10px 16px 6px; font-size: 15px; color: var(--ink); }
+.cap-scene {
+  position: relative;
+  margin: 6px 12px 10px;
+  border: 2px solid #8a6534;
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 460 / 250;
+  user-select: none;
+  /* fondo solido por si el gradiente SVG no pinta */
+  background: linear-gradient(180deg, #a8c8de 0%, #e8c9a0 62%, #c9dba8 66%, #9ec27c 100%);
+}
+.cap-scene > svg { display: block; width: 100%; height: 100%; }
+.cap-dog {
+  position: absolute; top: 0; left: 0;
+  width: 110px; height: 100px;
+  cursor: grab;
+  touch-action: none;
+  filter: drop-shadow(0 5px 4px rgba(30,18,8,0.35));
+  transform-origin: 55px 60px;
+}
+.cap-dog > svg { animation: capDogIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s both; }
+@keyframes capDogIn {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
+.cap-dog.dragging { cursor: grabbing; filter: drop-shadow(0 12px 8px rgba(30,18,8,0.4)); }
+.cap-dog .cap-tail { transform-origin: 22px 58px; }
+.cap-dog.happy .cap-tail { animation: capWag 0.35s ease-in-out infinite; }
+@keyframes capWag {
+  0%, 100% { transform: rotate(-12deg); }
+  50%      { transform: rotate(26deg); }
+}
+.cap-dog.happy .cap-head { animation: capNod 0.7s ease-in-out infinite; transform-origin: 70px 45px; }
+@keyframes capNod {
+  0%, 100% { transform: rotate(0); }
+  50%      { transform: rotate(-5deg); }
+}
+.cap-msg {
+  position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%) translateY(6px);
+  background: rgba(122, 31, 22, 0.94); color: #ffe9b0;
+  padding: 6px 16px; border-radius: 999px;
+  font-size: 13.5px; font-weight: bold; white-space: nowrap;
+  opacity: 0; transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+}
+.cap-msg.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.cap-success {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  background: rgba(46, 88, 38, 0.55);
+  color: #ffffff; font-size: 17px; font-weight: 900;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  opacity: 0; pointer-events: none; transition: opacity 0.35s;
+}
+.cap-success.show { opacity: 1; }
+.cap-check {
+  width: 54px; height: 54px; border-radius: 50%;
+  background: #3d9142; border: 3px solid #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px; color: #fff;
+  animation: capPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes capPop { from { transform: scale(0); } to { transform: scale(1); } }
+.cap-foot {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px 12px;
+  font-size: 13px; color: #6b4f2a;
+}
+.cap-fakebox {
+  width: 18px; height: 18px; border: 2px solid #8a6534; border-radius: 4px;
+  background: #fffaf0; display: inline-block;
+}
+.cap-brand { margin-left: auto; font-size: 10.5px; color: #a08a60; letter-spacing: 0.5px; }
+
 /* Scrollbars */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: rgba(0,0,0,0.08); }
