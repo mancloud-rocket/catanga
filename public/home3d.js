@@ -887,7 +887,7 @@ function makePotion(labelText) {
 function spawnDroplet(pos, vel) {
   let d = droplets.find((dd) => !dd.alive);
   if (!d) {
-    if (droplets.length >= (LOW_DETAIL ? 8 : 18)) return;
+    if (droplets.length >= (LOW_DETAIL ? 12 : 32)) return;
     const mesh = new THREE.Mesh(
       new THREE.SphereGeometry(0.09, 8, 6),
       new THREE.MeshStandardMaterial({
@@ -909,7 +909,7 @@ function spawnDroplet(pos, vel) {
 function launchPotion(t) {
   let p = potions.find((pp) => !pp.alive);
   if (!p) {
-    if (potions.length >= (LOW_DETAIL ? 1 : 2)) return;
+    if (potions.length >= (LOW_DETAIL ? 2 : 5)) return;
     p = { group: makePotion(POTION_LABELS[potions.length % 2]), alive: false };
     scene.add(p.group);
     potions.push(p);
@@ -924,15 +924,15 @@ function launchPotion(t) {
   p.nextDrip = 0;
   p.alive = true;
   p.group.visible = true;
-  p.group.scale.setScalar(1.15);
+  p.group.scale.setScalar(1.0 + Math.random() * 0.4);
 }
 
 function buildPotions() {
-  let nextLaunch = 5.5; // la primera pota vuela despues de la intro
+  let nextLaunch = 4; // la primera pota vuela apenas termina la intro
   updaters.push((t, dt) => {
     if (t >= nextLaunch) {
       launchPotion(t);
-      nextLaunch = t + 9 + Math.random() * 6;
+      nextLaunch = t + 3.5 + Math.random() * 4;
     }
     for (const p of potions) {
       if (!p.alive) continue;
