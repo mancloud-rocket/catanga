@@ -15,6 +15,11 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+// Pagina troll de verificacion de identidad (no toca el juego real)
+app.get('/amigos', (_req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'amigos.html'));
+});
+
 const server = http.createServer(app);
 const io = new Server(server);
 
