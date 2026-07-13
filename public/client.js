@@ -87,11 +87,14 @@
     const code = $('input-code').value.trim().toUpperCase();
     if (!name) return ($('home-error').textContent = 'Pone tu nombre primero.');
     if (code.length !== 4) return ($('home-error').textContent = 'El codigo tiene 4 letras.');
-    socket.emit('joinRoom', { code, name }, (res) => {
+    const doJoin = () => socket.emit('joinRoom', { code, name }, (res) => {
       if (!res.ok) return ($('home-error').textContent = res.error);
       saveSession(res.code, res.token, name);
       showScreen(res.started ? 'game' : 'lobby');
     });
+    // Nadie entra a Catan sin atar a Gaston primero
+    if (window.GastonCaptcha) window.GastonCaptcha.show(doJoin);
+    else doJoin();
   }
 
   $('btn-start').addEventListener('click', () => {
