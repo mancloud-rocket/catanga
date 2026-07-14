@@ -6,12 +6,12 @@
 <title>CATAN - Verificacion de identidad</title>
 <link rel="stylesheet" href="style.css">
 <style>
-/* ===== Pagina troll /amigos: estilos propios con prefijo am- ===== */
+/* ===== Pagina troll /amigos ===== */
 
 .am-screen { display: none; min-height: 100vh; align-items: center; justify-content: center; padding: 24px; }
 .am-screen.active { display: flex; }
 
-/* --- Selector de identidad --- */
+/* --- Selector --- */
 .am-select-card {
   width: min(760px, 94vw);
   background: linear-gradient(180deg, var(--parchment), var(--parchment-dark));
@@ -22,10 +22,7 @@
 }
 .am-select-card h1 { font-size: 40px; margin-bottom: 4px; }
 .am-kicker { color: #7a6242; font-style: italic; margin-bottom: 22px; }
-.am-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
-}
+.am-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
 .am-friend {
   background: #fffaf0; border: 2px solid #cbb37e; border-radius: 12px;
   padding: 16px 8px 12px;
@@ -34,9 +31,9 @@
   box-shadow: 0 3px 8px rgba(0,0,0,0.15);
 }
 .am-friend:hover {
-  transform: translateY(-5px) rotate(-1deg);
+  transform: translateY(-6px) rotate(-1.5deg) scale(1.03);
   border-color: var(--red-catan);
-  box-shadow: 0 12px 22px rgba(0,0,0,0.3);
+  box-shadow: 0 14px 26px rgba(0,0,0,0.32);
 }
 .am-friend .am-avatar {
   width: 58px; height: 58px; border-radius: 50%;
@@ -50,29 +47,33 @@
 
 /* --- Escenario generico --- */
 .am-stage-card {
-  width: min(640px, 94vw);
+  width: min(660px, 94vw);
   background: linear-gradient(180deg, var(--parchment), var(--parchment-dark));
   border: 3px solid #8a6534; border-radius: 16px;
   box-shadow: 0 24px 70px rgba(0,0,0,0.65);
   padding: 34px 38px; text-align: center;
+  position: relative; z-index: 10;
   animation: capBoxIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 .am-stage-card h2 { color: var(--red-catan); font-size: 26px; margin-bottom: 10px; }
 .am-stage-card p { font-size: 16px; line-height: 1.55; color: var(--ink); }
 .am-row { display: flex; gap: 12px; justify-content: center; margin-top: 22px; flex-wrap: wrap; }
 .am-note { font-size: 12.5px; color: #8a6c46; font-style: italic; margin-top: 14px; }
+.am-msg { min-height: 26px; font-weight: bold; font-size: 16px; color: var(--red-catan); margin-top: 10px; }
+
+/* particulas genericas */
+.am-rain, .am-float { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 5; }
+.am-rain span { position: absolute; top: -60px; animation: amFall linear both; }
+@keyframes amFall { to { transform: translateY(115vh) rotate(540deg); } }
+.am-float span { position: absolute; bottom: -60px; animation: amFloatUp linear both; }
+@keyframes amFloatUp { to { transform: translateY(-115vh) rotate(40deg); } }
 
 /* --- Fernando VIP --- */
 body.theme-vip { background: radial-gradient(ellipse at 50% 20%, #6a4a12, #2d1b0d 70%); }
-.theme-vip .am-stage-card {
-  border-color: #e8b64c;
-  box-shadow: 0 0 60px rgba(232,182,76,0.35), 0 24px 70px rgba(0,0,0,0.65);
-}
+.theme-vip .am-stage-card { border-color: #e8b64c; box-shadow: 0 0 60px rgba(232,182,76,0.35), 0 24px 70px rgba(0,0,0,0.65); }
 
-/* --- Diego banca privada --- */
-body.theme-banco {
-  background: linear-gradient(180deg, #0c1b2e 0%, #12263d 60%, #0a1524 100%);
-}
+/* --- Diego banca + boxeo --- */
+body.theme-banco { background: linear-gradient(180deg, #0c1b2e 0%, #12263d 60%, #0a1524 100%); }
 .theme-banco .am-stage-card {
   background: linear-gradient(180deg, #f8f6f0, #ece7da);
   border-color: #b89a55;
@@ -80,39 +81,65 @@ body.theme-banco {
 }
 .theme-banco .am-stage-card h2 { color: #0c1b2e; letter-spacing: 1px; }
 .am-banco-logo { font-size: 13px; letter-spacing: 4px; color: #b89a55; font-weight: 900; margin-bottom: 14px; }
+.am-ticker {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 6;
+  background: rgba(5, 12, 22, 0.92); color: #7fd490;
+  font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold;
+  padding: 8px 0; white-space: nowrap; overflow: hidden;
+  border-top: 1px solid #b89a55;
+}
+.am-ticker div { display: inline-block; padding-left: 100vw; animation: amTicker 22s linear infinite; }
+@keyframes amTicker { to { transform: translateX(-100%); } }
 .am-wealth-bar {
   height: 26px; border-radius: 6px; overflow: hidden;
-  background: #dcd5c2; border: 1px solid #b89a55; margin: 18px 0 6px;
-  display: flex;
+  background: #dcd5c2; border: 1px solid #b89a55; margin: 18px 0 6px; display: flex;
 }
 .am-wealth-fill {
   background: linear-gradient(90deg, #b89a55, #e2c377);
   width: 100%;
   display: flex; align-items: center; justify-content: flex-end;
   color: #0c1b2e; font-weight: 900; font-size: 13px; padding-right: 8px;
-  transition: width 2.2s cubic-bezier(0.6, 0, 0.3, 1);
+  transition: width 0.5s ease;
+}
+/* ring de boxeo */
+.am-ring {
+  position: relative; margin: 14px auto 4px;
+  border-radius: 12px; overflow: hidden;
+  background: linear-gradient(180deg, #24435e 0%, #2e5474 55%, #7a4a2a 56%, #5a3620 100%);
+  border: 3px solid #b89a55;
+  height: 280px;
+  user-select: none;
+}
+.am-ring::before, .am-ring::after {
+  content: ''; position: absolute; left: 0; right: 0; height: 4px; background: #d8d2c0;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.4);
+}
+.am-ring::before { top: 24%; }
+.am-ring::after { top: 44%; }
+.am-souto {
+  position: absolute; bottom: 6px; left: 50%; width: 150px; margin-left: -75px;
+  transform-origin: 50% 96%;
+  filter: drop-shadow(0 6px 6px rgba(0,0,0,0.4));
+}
+.am-boxing, .am-boxing * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cg stroke='%235a1010' stroke-width='1.6'%3E%3Cellipse cx='24' cy='20' rx='6' ry='5' fill='%23c0392b'/%3E%3Ccircle cx='15' cy='15' r='11' fill='%23e04b38'/%3E%3Crect x='9' y='25' width='13' height='8' rx='2.5' fill='%23f0e6d0'/%3E%3C/g%3E%3C/svg%3E") 15 15, pointer !important;
+}
+.am-pow {
+  position: absolute; z-index: 20; pointer-events: none;
+  font-weight: 900; font-size: 26px; color: #ffd23e;
+  -webkit-text-stroke: 1.5px #7a1f16;
+  transform: rotate(-8deg);
 }
 
 /* --- Gaston potas --- */
 body.theme-potas { background: radial-gradient(ellipse at 50% 30%, #14381f, #0a1f10 75%); }
 .am-pota-slider { width: 100%; margin: 20px 0 6px; accent-color: #2fae4e; height: 30px; }
 .am-pota-count { font-size: 54px; font-weight: 900; color: #1d8f3c; line-height: 1; }
-.am-pota-verdict { min-height: 26px; font-weight: bold; font-size: 16px; color: var(--red-catan); margin-top: 8px; }
-.am-pota-rain { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 5; }
-.am-pota-rain span { position: absolute; top: -60px; animation: amPotaFall linear both; }
-@keyframes amPotaFall {
-  to { transform: translateY(115vh) rotate(720deg); }
-}
 
-/* --- Agustin: boda + Escocia --- */
+/* --- Agustin: boda + Escocia + CUTCSA --- */
 body.theme-boda { background: radial-gradient(ellipse at 50% 25%, #4a3550, #241628 75%); }
-.am-invite {
-  border: 3px double #b89ac4 !important;
-  position: relative;
-}
-.am-invite::before, .am-invite::after {
-  content: '❦'; position: absolute; font-size: 26px; color: #8e5aa8;
-}
+.am-invite { border: 3px double #b89ac4 !important; position: relative; }
+.am-invite::before, .am-invite::after { content: '❦'; position: absolute; font-size: 26px; color: #8e5aa8; }
 .am-invite::before { top: 10px; left: 16px; }
 .am-invite::after { bottom: 10px; right: 16px; }
 .am-invite h2 { font-size: 30px !important; color: #6a4a78 !important; }
@@ -124,22 +151,42 @@ body.theme-escocia {
     repeating-linear-gradient(90deg, rgba(180,30,40,0.16) 0 22px, transparent 22px 46px, rgba(240,220,90,0.06) 46px 52px, transparent 52px 90px),
     linear-gradient(180deg, #16351f 0%, #0e2415 100%);
 }
-.am-scot-scape {
-  position: fixed; bottom: 0; left: 0; right: 0; height: 30vh;
-  pointer-events: none; z-index: 0;
-}
-.theme-escocia .am-stage-card { position: relative; z-index: 2; border-color: #b0a060; }
-.am-kilt { margin: 14px auto 4px; display: block; }
-.am-float { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
-.am-float span { position: absolute; bottom: -60px; animation: amFloatUp linear both; }
-@keyframes amFloatUp {
-  to { transform: translateY(-115vh) rotate(40deg); }
-}
+.am-scot-scape { position: fixed; bottom: 0; left: 0; right: 0; height: 30vh; pointer-events: none; z-index: 0; }
+.theme-escocia .am-stage-card { border-color: #b0a060; }
 
-/* --- Lucas: India total --- */
-body.theme-india {
-  background: linear-gradient(180deg, #f9963a 0%, #f6a94e 32%, #f5efe2 33%, #f5efe2 66%, #2e8b57 67%, #1e6e42 100%);
+/* CUTCSA */
+.am-cutcsa-scene {
+  position: relative; margin: 14px 0 4px;
+  border-radius: 12px; overflow: hidden;
+  border: 3px solid #b0a060;
+  height: 280px; user-select: none;
+  background: linear-gradient(180deg, #8fc4de 0%, #b8dcc8 38%, #7fb668 40%, #6aa356 100%);
 }
+.am-lane {
+  position: absolute; left: 0; right: 0; height: 74px;
+  background: linear-gradient(180deg, #5a5a60, #4a4a50);
+  border-top: 4px solid #3a3a40; border-bottom: 4px solid #3a3a40;
+}
+.am-lane::before {
+  content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 4px; margin-top: -2px;
+  background: repeating-linear-gradient(90deg, #e8d9a8 0 26px, transparent 26px 52px);
+}
+.am-lane-label {
+  position: absolute; left: 10px; top: -26px;
+  background: #2e5a2e; color: #fff; font-size: 11px; font-weight: 900;
+  padding: 2px 10px; border-radius: 4px 4px 0 0; letter-spacing: 1px;
+}
+.am-bus {
+  position: absolute; z-index: 15; width: 120px;
+  cursor: grab; touch-action: none;
+  filter: drop-shadow(0 6px 5px rgba(0,0,0,0.35));
+}
+.am-bus.dragging { cursor: grabbing; }
+.am-rubia { position: absolute; z-index: 8; width: 54px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3)); }
+.am-poof { position: absolute; z-index: 20; font-size: 40px; pointer-events: none; }
+
+/* --- Lucas India --- */
+body.theme-india { background: linear-gradient(180deg, #f9963a 0%, #f6a94e 32%, #f5efe2 33%, #f5efe2 66%, #2e8b57 67%, #1e6e42 100%); }
 .am-chakra {
   position: fixed; top: 50%; left: 50%;
   width: 340px; height: 340px; margin: -170px 0 0 -170px;
@@ -155,27 +202,22 @@ body.theme-india {
           mask: radial-gradient(circle, transparent 58%, #000 59%, #000 100%);
 }
 @keyframes amChakraSpin { to { transform: rotate(360deg); } }
-.am-taj {
-  position: fixed; bottom: 0; left: 0; right: 0; height: 26vh;
-  pointer-events: none; z-index: 1; opacity: 0.9;
-}
-.theme-india .am-stage-card {
-  position: relative; z-index: 2;
-  border-color: #d4881f;
-  box-shadow: 0 0 50px rgba(249, 150, 58, 0.4), 0 24px 70px rgba(0,0,0,0.5);
-}
+.am-taj { position: fixed; bottom: 0; left: 0; right: 0; height: 26vh; pointer-events: none; z-index: 1; opacity: 0.9; }
+.theme-india .am-stage-card { border-color: #d4881f; box-shadow: 0 0 50px rgba(249,150,58,0.4), 0 24px 70px rgba(0,0,0,0.5); }
 .theme-india .am-stage-card h2 { color: #c05a10; }
 .am-garland {
   position: fixed; top: -6px; left: 0; right: 0; text-align: center;
-  font-size: 26px; letter-spacing: 6px; z-index: 3; pointer-events: none;
+  font-size: 26px; letter-spacing: 6px; z-index: 6; pointer-events: none;
   text-shadow: 0 3px 4px rgba(0,0,0,0.25);
 }
-.am-curry-scale {
-  display: flex; justify-content: space-between; font-size: 12px;
-  color: #8a6c46; margin-top: 2px; font-weight: bold;
+.am-curry-scale { display: flex; justify-content: space-between; font-size: 12px; color: #8a6c46; margin-top: 2px; font-weight: bold; }
+.am-umbral {
+  font-size: 13px; font-weight: 900; color: #c05a10;
+  background: #fff3df; border: 1px dashed #d4881f; border-radius: 6px;
+  padding: 4px 10px; display: inline-block; margin-top: 8px;
 }
 .am-cow {
-  position: absolute; font-size: 58px; z-index: 5;
+  position: absolute; font-size: 58px; z-index: 15;
   filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));
   transition: transform 2.2s ease-in-out;
   pointer-events: none;
@@ -186,15 +228,26 @@ body.theme-india {
   font-size: 13px; font-weight: bold; padding: 2px 10px; white-space: nowrap;
   opacity: 0; transition: opacity 0.3s;
 }
+.am-pais-card {
+  background: #fffaf0; border: 3px solid #cbb37e; border-radius: 14px;
+  padding: 18px 22px; width: 190px;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  font-family: inherit;
+}
+.am-pais-card:hover {
+  transform: translateY(-6px) scale(1.04); border-color: #c05a10;
+  box-shadow: 0 14px 26px rgba(0,0,0,0.3);
+}
+.am-pais-card svg { display: block; margin: 0 auto; }
 
-/* --- Martin: cursor con menisco roto --- */
+/* --- Martin canarias --- */
 body.theme-canarias {
   background: linear-gradient(180deg, #3a7ca8 0%, #6fb3d4 55%, #e8d9a8 56%, #d4be85 100%);
   cursor: none !important;
 }
 body.theme-canarias * { cursor: none !important; }
 #am-cursor {
-  position: fixed; z-index: 200; pointer-events: none;
+  position: fixed; z-index: 300; pointer-events: none;
   width: 30px; height: 30px; top: 0; left: 0;
   filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4));
 }
@@ -205,10 +258,7 @@ body.theme-canarias * { cursor: none !important; }
   display: flex; align-items: center; justify-content: center;
   backdrop-filter: blur(2px) grayscale(0.6);
 }
-.am-diag-bar {
-  height: 18px; border-radius: 9px; background: #dcd5c2;
-  border: 1px solid #8a6534; overflow: hidden; margin: 14px 0;
-}
+.am-diag-bar { height: 18px; border-radius: 9px; background: #dcd5c2; border: 1px solid #8a6534; overflow: hidden; margin: 14px 0; }
 .am-diag-fill {
   height: 100%; width: 0%;
   background: repeating-linear-gradient(45deg, #5a8aa8 0 12px, #4a7a98 12px 24px);
@@ -219,8 +269,17 @@ body.theme-canarias * { cursor: none !important; }
   background: rgba(255,250,240,0.92); border: 2px solid #8a6534; border-radius: 10px;
   padding: 6px 14px; font-size: 13px; font-weight: bold; color: var(--ink);
 }
+.am-sol {
+  position: fixed; top: 40px; left: 60px; z-index: 1;
+  width: 90px; height: 90px; border-radius: 50%;
+  background: radial-gradient(circle, #fff2c8, #ffd76a 60%, rgba(255,215,106,0));
+  animation: amSolPulse 5s ease-in-out infinite;
+}
+@keyframes amSolPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+.am-palmera { position: fixed; bottom: -8px; z-index: 2; pointer-events: none; transform-origin: 50% 100%; animation: amPalm 6s ease-in-out infinite; }
+@keyframes amPalm { 0%,100% { transform: rotate(-2deg); } 50% { transform: rotate(2.5deg); } }
 
-/* --- Ruibal: contrato --- */
+/* --- Ruibal contrato --- */
 body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #26221c 75%); }
 .am-contrato {
   background: linear-gradient(180deg, #f6efdc, #ece0c2) !important;
@@ -237,10 +296,7 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
 .am-contrato p { font-size: 13.5px !important; line-height: 1.65 !important; }
 .am-clausula { margin-top: 10px; }
 .am-clausula b { text-decoration: underline; }
-.am-firma-zone {
-  margin-top: 16px; border: 2px dashed #8a6534; border-radius: 8px;
-  background: #fffaf0; position: relative;
-}
+.am-firma-zone { margin-top: 16px; border: 2px dashed #8a6534; border-radius: 8px; background: #fffaf0; position: relative; }
 .am-firma-zone canvas { display: block; width: 100%; height: 120px; touch-action: none; }
 .am-firma-hint {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
@@ -270,12 +326,11 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
   to   { transform: rotate(-8deg) scale(1); opacity: 1; }
 }
 #am-dodge { position: relative; transition: left 0.15s ease-out, top 0.15s ease-out; left: 0; top: 0; }
-.am-punch { display: none; margin-top: 16px; font-size: 17px; font-weight: 900; color: var(--red-catan); }
+.am-punch-line { display: none; margin-top: 16px; font-size: 17px; font-weight: 900; color: var(--red-catan); }
 </style>
 </head>
 <body>
 
-<!-- ===== Selector ===== -->
 <div id="am-select" class="am-screen active">
   <div class="am-select-card">
     <h1 class="game-title small">CATAN</h1>
@@ -285,7 +340,6 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
   </div>
 </div>
 
-<!-- ===== Escenario ===== -->
 <div id="am-stage" class="am-screen"></div>
 
 <script src="/vendor/gsap.min.js"></script>
@@ -300,13 +354,14 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
     { id: 'gaston', name: 'Gaston', emoji: '🧪', color: '#2fae4e', hint: 'full bajo torre' },
     { id: 'ruibal', name: 'Ruibal', emoji: '🏠', color: '#c0392b', hint: 'magnate inmobiliario' },
     { id: 'agustin', name: 'Agustin', emoji: '💍', color: '#8e5aa8', hint: 'comprometido' },
-    { id: 'lucas', name: 'Lucas', emoji: '🍛', color: '#e67e22', hint: 'namaste' },
+    { id: 'lucas', name: 'Lucas', emoji: '🍛', color: '#e67e22', hint: 'en el molde' },
     { id: 'martin', name: 'Martin', emoji: '🦵', color: '#5a8aa8', hint: 'en reposo deportivo' },
   ];
 
   const grid = document.getElementById('am-grid');
   const stage = document.getElementById('am-stage');
   const selectScreen = document.getElementById('am-select');
+  const g = window.gsap;
 
   for (const f of FRIENDS) {
     const btn = document.createElement('button');
@@ -315,19 +370,60 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
     btn.addEventListener('click', () => start(f.id));
     grid.appendChild(btn);
   }
+  if (g) g.from('.am-friend', { y: 26, opacity: 0, stagger: 0.06, duration: 0.5, ease: 'back.out(1.6)', delay: 0.2 });
 
+  // limpia decorados de la escena anterior y muestra la nueva
   function show(html, themeClass) {
+    for (const el of document.querySelectorAll('.am-scenery')) el.remove();
     document.body.className = themeClass || '';
     selectScreen.classList.remove('active');
     stage.innerHTML = html;
     stage.classList.add('active');
   }
 
+  function scenery(html) {
+    document.body.insertAdjacentHTML('beforeend', html);
+  }
+
+  function rainEmojis(list, count, minDur, maxDur) {
+    const wrap = document.createElement('div');
+    wrap.className = 'am-rain am-scenery';
+    document.body.appendChild(wrap);
+    for (let i = 0; i < count; i++) {
+      const s = document.createElement('span');
+      s.textContent = list[i % list.length];
+      s.style.left = Math.random() * 96 + 'vw';
+      s.style.fontSize = 16 + Math.random() * 26 + 'px';
+      s.style.animationDuration = minDur + Math.random() * (maxDur - minDur) + 's';
+      s.style.animationDelay = Math.random() * 5 + 's';
+      s.style.animationIterationCount = 'infinite';
+      wrap.appendChild(s);
+    }
+    return wrap;
+  }
+
+  function floatEmojis(list, count, minDur, maxDur) {
+    const wrap = document.createElement('div');
+    wrap.className = 'am-float am-scenery';
+    document.body.appendChild(wrap);
+    for (let i = 0; i < count; i++) {
+      const s = document.createElement('span');
+      s.textContent = list[i % list.length];
+      s.style.left = Math.random() * 96 + 'vw';
+      s.style.fontSize = 16 + Math.random() * 28 + 'px';
+      s.style.animationDuration = minDur + Math.random() * (maxDur - minDur) + 's';
+      s.style.animationDelay = Math.random() * 5 + 's';
+      s.style.animationIterationCount = 'infinite';
+      wrap.appendChild(s);
+    }
+    return wrap;
+  }
+
   function start(id) {
     ({ fernando, diego, gaston, ruibal, agustin, lucas, martin })[id]();
   }
 
-  // ============ FINAL COMPARTIDO: el boton esquiva ============
+  // ============ FINAL COMPARTIDO ============
 
   function showEnd(extra) {
     show(`
@@ -338,25 +434,21 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
         <div class="am-row" style="min-height:70px">
           <button class="btn btn-primary" id="am-dodge">Entrar a la partida</button>
         </div>
-        <p class="am-punch" id="am-punch">El link real lo tiene Fernando. Siempre lo tuvo. 😌</p>
+        <p class="am-punch-line" id="am-punch-line">El link real lo tiene Fernando. Siempre lo tuvo. 😌</p>
       </div>`);
     const btn = document.getElementById('am-dodge');
     let dodges = 0;
+    const reveal = () => {
+      btn.style.display = 'none';
+      document.getElementById('am-punch-line').style.display = 'block';
+    };
     btn.addEventListener('mouseenter', () => {
       dodges++;
-      if (dodges > 5) {
-        btn.style.display = 'none';
-        document.getElementById('am-punch').style.display = 'block';
-        return;
-      }
+      if (dodges > 5) return reveal();
       btn.style.left = (Math.random() * 360 - 180) + 'px';
       btn.style.top = (Math.random() * 90 - 30) + 'px';
     });
-    btn.addEventListener('click', () => {
-      // por si lo agarra con el teclado o un toque rapido
-      btn.style.display = 'none';
-      document.getElementById('am-punch').style.display = 'block';
-    });
+    btn.addEventListener('click', reveal);
   }
 
   // ============ FERNANDO ============
@@ -366,54 +458,152 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
       <div class="am-stage-card">
         <h2 style="color:#a3721a">👑 Identidad confirmada</h2>
         <p><b>Bienvenido, fundador.</b> El sistema no verifica al que lo diseño.</p>
-        <p style="margin-top:10px">Acceso VIP concedido. Alfombra roja desplegada. Los subditos fueron notificados.</p>
+        <p style="margin-top:10px">Acceso VIP concedido. Alfombra roja desplegada. Los subditos ya fueron notificados.</p>
         <div class="am-row">
           <button class="btn btn-primary" id="am-fer-ok">Proceder con elegancia</button>
         </div>
       </div>`, 'theme-vip');
+    rainEmojis(['👑', '✨'], 10, 6, 12);
     document.getElementById('am-fer-ok').addEventListener('click', () =>
       showEnd('Vos tenes el link real. Esto era para verlos sufrir a ellos.'));
   }
 
-  // ============ DIEGO: banca privada ============
+  // ============ DIEGO: banca + PEGALE A SOUTO ============
+
+  function diegoScenery() {
+    scenery(`<div class="am-ticker am-scenery"><div>
+      CHETO-COIN -50% ▼ · YATE.UY -12% ▼ · ASADO +400% ▲ · IPC: APROBADO POR UNANIMIDAD ·
+      COUNTRY-CLUB -8% ▼ · TERMO Y MATE +90% ▲ · SOUTO: COTIZA EN GOLPES ·
+    </div></div>`);
+    rainEmojis(['💸'], 8, 7, 13);
+  }
 
   function diego() {
     show(`
       <div class="am-stage-card">
         <div class="am-banco-logo">BANCO DE CATAN · PRIVATE WEALTH</div>
-        <h2>Estimado cliente Diego,</h2>
-        <p style="text-align:left">Nuestro equipo de analistas detecto que usted posee <b>el patrimonio mas alto del grupo</b>: como es el unico con plata de verdad, la banca lo felicita y lamenta informarle lo siguiente.</p>
-        <p style="text-align:left; margin-top:10px">En pos de la <i>equidad colonizadora</i>, este juego aplicara sobre su cuenta el <b>Impuesto Progresivo al Cheto (IPC)</b>: comenzara la partida con <b>LA MITAD de los recursos</b>.</p>
-        <div class="am-wealth-bar"><div class="am-wealth-fill" id="am-wealth">100%</div></div>
+        <h2>Estimado Diego,</h2>
+        <p style="text-align:left">Detectamos que <b>tenes mas plata que todos los demas</b>. Asi que lamentablemente, para equiparar la situacion, se te aplicara el <b>IPC (Impuesto Progresivo al Cheto)</b>, por lo cual vas a empezar la partida con <b>la mitad de los recursos</b>.</p>
+        <div class="am-wealth-bar"><div class="am-wealth-fill" id="am-wealth" style="width:100%">30/30</div></div>
         <p class="am-note" style="text-align:right">patrimonio auditado en tiempo real</p>
+        <p style="margin-top:10px">Podes apelar la decision. <b>Te aconsejamos hacerlo.</b></p>
         <div class="am-row">
-          <button class="btn" id="am-diego-apelar">Apelar</button>
-          <button class="btn btn-primary" id="am-diego-ok">Aceptar mi destino</button>
+          <button class="btn btn-primary" id="am-diego-apelar">Apelar</button>
+          <button class="btn" id="am-diego-ok">Aceptar mi destino</button>
         </div>
-        <p class="am-pota-verdict" id="am-diego-msg"></p>
       </div>`, 'theme-banco');
+    diegoScenery();
 
-    // el patrimonio se desangra en vivo
     setTimeout(() => {
       const bar = document.getElementById('am-wealth');
-      bar.style.width = '50%';
-      bar.textContent = '50%';
-    }, 600);
+      if (bar) { bar.style.transition = 'width 2s cubic-bezier(0.6,0,0.3,1)'; bar.style.width = '50%'; bar.textContent = '15/30'; }
+    }, 700);
 
-    let apelaciones = 0;
-    const msgs = [
-      'Apelacion rechazada. Firmado: El Socialismo.',
-      'Segunda apelacion rechazada. El country no es jurisdiccion valida.',
-      'Su abogado tambien voto a favor del impuesto.',
-    ];
-    document.getElementById('am-diego-apelar').addEventListener('click', () => {
-      document.getElementById('am-diego-msg').textContent = msgs[Math.min(apelaciones++, msgs.length - 1)];
-    });
     document.getElementById('am-diego-ok').addEventListener('click', () =>
-      showEnd('Recursos iniciales: 50%. La revolucion te saluda, Diego.'));
+      showEnd('Arrancas con 15 recursos. La revolucion te saluda, Diego.'));
+    document.getElementById('am-diego-apelar').addEventListener('click', diegoSouto);
   }
 
-  // ============ GASTON: Magela -> potas -> captcha ============
+  function soutoSvg() {
+    return `
+    <svg viewBox="0 0 150 210" width="150">
+      <g stroke="#2a1a10" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- resorte -->
+        <path d="M75 208 L60 200 L90 192 L60 184 L90 176 L75 170" fill="none" stroke="#6a6a70" stroke-width="5"/>
+        <ellipse cx="75" cy="208" rx="42" ry="9" fill="#4a4a50"/>
+        <!-- torso -->
+        <path fill="#d94f3d" d="M48 170 C44 130 50 104 75 100 C100 104 106 130 102 170 C92 176 58 176 48 170 Z"/>
+        <path fill="#b93d2d" d="M60 108 L75 128 L90 108" stroke="none"/>
+        <!-- brazos caidos -->
+        <path fill="#e8b48c" d="M48 118 C36 130 32 146 36 158 L46 154 C44 142 48 130 54 122 Z"/>
+        <path fill="#e8b48c" d="M102 118 C114 130 118 146 114 158 L104 154 C106 142 102 130 96 122 Z"/>
+        <!-- cabeza -->
+        <circle cx="75" cy="66" r="30" fill="#e8b48c"/>
+        <!-- pelo negro loco -->
+        <path fill="#1c1410" d="M46 60 C42 30 60 22 75 24 C90 22 108 30 104 60
+          L98 46 L94 58 L88 42 L83 56 L76 38 L70 56 L63 42 L58 58 L52 46 Z"/>
+        <!-- ojos de loco -->
+        <circle cx="64" cy="64" r="7.5" fill="#fff"/>
+        <circle cx="87" cy="62" r="9" fill="#fff"/>
+        <circle cx="65.5" cy="65" r="3" fill="#1c1410" stroke="none"/>
+        <circle cx="85" cy="63" r="3.4" fill="#1c1410" stroke="none"/>
+        <!-- sonrisa de loco + barba -->
+        <path d="M60 82 C68 90 84 90 92 80" fill="none"/>
+        <g fill="#1c1410" stroke="none">
+          <circle cx="58" cy="86" r="1"/><circle cx="64" cy="91" r="1"/><circle cx="72" cy="93" r="1"/>
+          <circle cx="80" cy="93" r="1"/><circle cx="88" cy="89" r="1"/><circle cx="93" cy="84" r="1"/>
+        </g>
+      </g>
+    </svg>`;
+  }
+
+  function diegoSouto() {
+    show(`
+      <div class="am-stage-card am-boxing">
+        <div class="am-banco-logo">TRIBUNAL DE APELACIONES · SALA DE BOXEO</div>
+        <h2>PEGALE A SOUTO</h2>
+        <p>La justicia de Catan es simple: <b>cuanto mas le pegues a Souto, mas recursos te devolvemos.</b><br>Llega a 30 y quedas como todos los demas.</p>
+        <div class="am-ring" id="am-ring">
+          <div class="am-souto" id="am-souto">${soutoSvg()}</div>
+        </div>
+        <div class="am-wealth-bar"><div class="am-wealth-fill" id="am-res-fill" style="width:50%">15/30</div></div>
+        <p class="am-msg" id="am-souto-msg">Souto te esta mirando. Pegale.</p>
+      </div>`, 'theme-banco');
+    diegoScenery();
+
+    const souto = document.getElementById('am-souto');
+    const ring = document.getElementById('am-ring');
+    const fill = document.getElementById('am-res-fill');
+    const msg = document.getElementById('am-souto-msg');
+    let recursos = 15;
+
+    const quips = [
+      [17, 'Souto empieza a dudar de sus decisiones.'],
+      [20, 'El tribunal aprueba la tecnica. Segui.'],
+      [23, 'Souto pide disculpas por existir.'],
+      [26, 'Los recursos vuelven. La justicia duele (a Souto).'],
+      [29, 'UNA MAS Y SOS CLASE MEDIA.'],
+    ];
+
+    souto.style.pointerEvents = 'auto';
+    souto.addEventListener('pointerdown', (e) => {
+      if (recursos >= 30) return;
+      recursos++;
+      fill.style.width = (recursos / 30 * 100) + '%';
+      fill.textContent = recursos + '/30';
+
+      // POW en el punto del golpe
+      const r = ring.getBoundingClientRect();
+      const pow = document.createElement('div');
+      pow.className = 'am-pow';
+      pow.textContent = ['POW!', 'PAF!', 'TOMA!', 'CRACK!'][recursos % 4];
+      pow.style.left = (e.clientX - r.left - 20) + 'px';
+      pow.style.top = (e.clientY - r.top - 20) + 'px';
+      ring.appendChild(pow);
+      if (g) {
+        g.to(pow, { y: -46, opacity: 0, scale: 1.6, duration: 0.7, ease: 'power1.out', onComplete: () => pow.remove() });
+        g.fromTo(souto, { rotation: e.clientX - r.left < r.width / 2 ? 22 : -22 },
+          { rotation: 0, duration: 0.9, ease: 'elastic.out(1.2, 0.25)' });
+        g.fromTo(ring, { x: 5 }, { x: 0, duration: 0.3, ease: 'elastic.out(2, 0.3)' });
+      } else {
+        setTimeout(() => pow.remove(), 600);
+      }
+
+      for (const [n, q] of quips) if (recursos === n) msg.textContent = q;
+
+      if (recursos >= 30) {
+        msg.textContent = 'APELACION CONCEDIDA. Souto quedo knockout, vos quedaste clase media.';
+        if (g) g.to(souto, { rotation: 88, y: 26, duration: 0.9, ease: 'bounce.out' });
+        setTimeout(() => showEnd('Apelacion concedida a las piñas: 30/30 recursos. Souto se recupera en observacion.'), 2200);
+      }
+    });
+  }
+
+  // ============ GASTON ============
+
+  function gastonScenery() {
+    floatEmojis(['🫧', '🧪'], 12, 6, 12);
+  }
 
   function gaston() {
     show(`
@@ -425,19 +615,19 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
           <button class="btn btn-primary" id="am-gas-si">Si, tengo permiso</button>
           <button class="btn" id="am-gas-no">No</button>
         </div>
-        <p class="am-pota-verdict" id="am-gas-msg"></p>
+        <p class="am-msg" id="am-gas-msg"></p>
       </div>`, 'theme-potas');
+    gastonScenery();
 
     document.getElementById('am-gas-no').addEventListener('click', () => {
-      const msg = document.getElementById('am-gas-msg');
-      msg.textContent = 'Anda a pedirle permiso. Te esperamos aca, tranquilos.';
+      document.getElementById('am-gas-msg').textContent = 'Anda a pedirle permiso, bo. Te esperamos aca, tranquilos.';
       const btn = document.getElementById('am-gas-si');
       btn.disabled = true;
       let s = 10;
       btn.textContent = `Pidiendo permiso... ${s}`;
       const iv = setInterval(() => {
         s--;
-        btn.textContent = s > 0 ? `Pidiendo permiso... ${s}` : 'Ya me dejo (mentira no le pregunte)';
+        btn.textContent = s > 0 ? `Pidiendo permiso... ${s}` : 'Ya me dejo (mentira, no le pregunte)';
         if (s <= 0) { btn.disabled = false; clearInterval(iv); }
       }, 1000);
     });
@@ -451,27 +641,28 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
         <p>¿Cuantas potas te vas a tomar en esta partida?</p>
         <div class="am-pota-count" id="am-pota-n">0</div>
         <input type="range" min="0" max="99" value="0" class="am-pota-slider" id="am-pota-slider">
-        <p class="am-pota-verdict" id="am-pota-verdict">Move el slider, no te hagas el sano.</p>
+        <p class="am-msg" id="am-pota-verdict">Move el slider, no te hagas el sano.</p>
         <div class="am-row">
           <button class="btn btn-primary" id="am-pota-ok" disabled>Confirmar dosis</button>
         </div>
       </div>`, 'theme-potas');
+    gastonScenery();
 
     const slider = document.getElementById('am-pota-slider');
     const count = document.getElementById('am-pota-n');
     const verdict = document.getElementById('am-pota-verdict');
     const ok = document.getElementById('am-pota-ok');
     const rain = document.createElement('div');
-    rain.className = 'am-pota-rain';
+    rain.className = 'am-rain am-scenery';
     document.body.appendChild(rain);
 
     const verdicts = [
       [0, 'Move el slider, no te hagas el sano.'],
-      [1, '¿Una sola? ¿Estas enfermo?'],
+      [1, '¿Una sola? ¿Estas enfermo, bo?'],
       [5, 'Tibio. Muy tibio.'],
       [15, 'Ahi esta el Gaston que conocemos.'],
       [30, 'El higado presento su renuncia.'],
-      [50, 'Farmacity te nombro cliente del año.'],
+      [50, 'La farmacia te nombro cliente del año.'],
       [80, 'MODO BAJO TORRE PERMANENTE ACTIVADO.'],
       [99, '99 potas. Magela ya fue notificada.'],
     ];
@@ -483,7 +674,6 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
       let text = verdicts[0][1];
       for (const [min, t] of verdicts) if (v >= min) text = t;
       verdict.textContent = text;
-      // llueven potas proporcionalmente
       if (v > lastRain) {
         for (let i = 0; i < Math.min(3, v - lastRain); i++) {
           const drop = document.createElement('span');
@@ -505,41 +695,33 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
     });
   }
 
-  // ============ AGUSTIN: boda + Escocia ============
-
-  function floatEmojis(list, count, minDur, maxDur) {
-    const wrap = document.createElement('div');
-    wrap.className = 'am-float';
-    document.body.appendChild(wrap);
-    for (let i = 0; i < count; i++) {
-      const s = document.createElement('span');
-      s.textContent = list[i % list.length];
-      s.style.left = Math.random() * 96 + 'vw';
-      s.style.fontSize = 18 + Math.random() * 30 + 'px';
-      s.style.animationDuration = minDur + Math.random() * (maxDur - minDur) + 's';
-      s.style.animationDelay = Math.random() * 4 + 's';
-      wrap.appendChild(s);
-    }
-    return wrap;
-  }
+  // ============ AGUSTIN: cura + Escocia + CUTCSA ============
 
   function agustin() {
     show(`
       <div class="am-stage-card am-invite">
-        <h2>Participación de compromiso</h2>
-        <p class="am-script">El Reino de Catan tiene el honor de consultarle:</p>
+        <h2>El Cura Martin Herbert</h2>
+        <p class="am-script">tiene el honor de consultarle:</p>
         <p class="am-script" style="margin-top:12px">Agustin, ¿aceptas a <b>@romimochileando</b> como tu legitima esposa,<br>
         en la salud y en los hostels,<br>
         en el wifi gratis y en la escala de 14 horas en Estambul,<br>
         hasta que el proximo vuelo low-cost los separe?</p>
         <div class="am-row">
           <button class="btn btn-primary" id="am-agu-si">Si, acepto</button>
-          <button class="btn" id="am-agu-si2">Acepto (no hay otra opcion)</button>
+          <button class="btn" id="am-agu-no">No acepto</button>
         </div>
-        <p class="am-note">La señorita ya subio la historia a Instagram. Es vinculante.</p>
+        <p class="am-msg" id="am-agu-msg"></p>
       </div>`, 'theme-boda');
+    rainEmojis(['🌸', '🌺', '💍'], 12, 7, 13);
+
+    document.getElementById('am-agu-no').addEventListener('click', function () {
+      document.getElementById('am-agu-msg').textContent =
+        'El Cura Martin Herbert no reconoce esa opcion. Romi ya subio la historia: es vinculante.';
+      this.textContent = 'Si, acepto (resignado)';
+      this.id = '';
+      this.addEventListener('click', agustinEscocia, { once: true });
+    }, { once: true });
     document.getElementById('am-agu-si').addEventListener('click', agustinEscocia);
-    document.getElementById('am-agu-si2').addEventListener('click', agustinEscocia);
   }
 
   function agustinEscocia() {
@@ -552,40 +734,15 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
           <button class="btn" id="am-agu-aye2">Tambien aye</button>
         </div>
       </div>`, 'theme-boda');
+    rainEmojis(['🌸', '🌺'], 8, 7, 13);
     const go = () => agustinHighlands();
     document.getElementById('am-agu-aye').addEventListener('click', go);
     document.getElementById('am-agu-aye2').addEventListener('click', go);
   }
 
-  function agustinHighlands() {
-    show(`
-      <div class="am-stage-card">
-        <h2 style="color:#3d5a2a">🏴󠁧󠁢󠁳󠁣󠁴󠁿 Bienvenido a las Highlands, Agustin McMochilero</h2>
-        <svg class="am-kilt" width="150" height="110" viewBox="0 0 150 110">
-          <g stroke="#2a1a10" stroke-width="2.5" stroke-linejoin="round">
-            <rect x="30" y="8" width="90" height="16" rx="5" fill="#4a2f1a"/>
-            <circle cx="75" cy="16" r="7" fill="#e8b64c"/>
-            <path fill="#8a2430" d="M32 24 L118 24 L132 96 C112 106 88 108 75 108 C62 108 38 106 18 96 Z"/>
-            <g stroke="rgba(240,220,90,0.55)" stroke-width="3">
-              <line x1="50" y1="24" x2="40" y2="102"/><line x1="75" y1="24" x2="75" y2="108"/><line x1="100" y1="24" x2="110" y2="102"/>
-            </g>
-            <g stroke="rgba(20,60,40,0.7)" stroke-width="7">
-              <line x1="26" y1="46" x2="124" y2="46"/><line x1="21" y1="72" x2="129" y2="72"/>
-            </g>
-          </g>
-        </svg>
-        <p style="font-weight:900; color:#3d5a2a; font-size:18px">FALDA EQUIPADA ✔</p>
-        <p style="margin-top:8px">El kilt es del clan <b>McMochileando</b>. La luna de miel es en carpa, obvio.<br>
-        Romi ya lo publico con el hashtag <i>#MiEscocesDeLowCost</i>.</p>
-        <div class="am-row">
-          <button class="btn btn-primary" id="am-agu-fin">Aceptar mi nueva vida</button>
-        </div>
-      </div>`, 'theme-escocia');
-
-    // paisaje: castillo + colinas + niebla
-    const scape = document.createElement('svg');
-    document.body.insertAdjacentHTML('beforeend', `
-      <svg class="am-scot-scape" viewBox="0 0 1200 240" preserveAspectRatio="xMidYMax slice">
+  function scotScenery() {
+    scenery(`
+      <svg class="am-scot-scape am-scenery" viewBox="0 0 1200 240" preserveAspectRatio="xMidYMax slice">
         <path d="M0 180 Q 200 120 420 170 T 1200 150 L 1200 240 L 0 240 Z" fill="#1d4028"/>
         <path d="M0 210 Q 300 160 600 200 T 1200 190 L 1200 240 L 0 240 Z" fill="#142e1c"/>
         <g fill="#0d2013">
@@ -594,26 +751,176 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
           <rect x="976" y="84" width="26" height="96"/>
           <path d="M878 90 l4 -14 6 8 5 -12 6 12 5 -8 4 14 Z"/>
           <path d="M974 84 l4 -14 6 8 5 -12 6 12 5 -8 4 14 Z"/>
-          <rect x="932" y="140" width="18" height="40" rx="8" fill="#081409"/>
         </g>
         <ellipse cx="300" cy="228" rx="260" ry="26" fill="rgba(220,235,240,0.13)"/>
-        <ellipse cx="820" cy="234" rx="320" ry="24" fill="rgba(220,235,240,0.1)"/>
         <text x="180" y="196" font-size="22">🐑</text>
-        <text x="240" y="206" font-size="16">🐑</text>
         <text x="480" y="200" font-size="19">🐑</text>
       </svg>`);
-    floatEmojis(['🎶', '🌫️', '🥃'], 10, 9, 16);
-    document.getElementById('am-agu-fin').addEventListener('click', () =>
-      showEnd('Matrimonio registrado en el clan. Escocia te espera, la falda ya esta planchada.'));
+    floatEmojis(['🎶', '🌫️', '🥃'], 8, 9, 16);
   }
 
-  // ============ LUCAS: India total ============
+  function agustinHighlands() {
+    show(`
+      <div class="am-stage-card">
+        <h2 style="color:#3d5a2a; font-size:32px">🏴󠁧󠁢󠁳󠁣󠁴󠁿 ¡AHORA SOS UN PELADO PUTO DE ESCOCIA!</h2>
+        <svg width="130" height="120" viewBox="0 0 130 120" style="margin:8px auto; display:block">
+          <g stroke="#2a1a10" stroke-width="2.5" stroke-linejoin="round">
+            <!-- boina escocesa -->
+            <ellipse cx="65" cy="30" rx="44" ry="16" fill="#8a2430"/>
+            <circle cx="65" cy="16" r="7" fill="#e8b64c"/>
+            <!-- cabeza pelada brillante -->
+            <circle cx="65" cy="62" r="34" fill="#e8b48c"/>
+            <ellipse cx="52" cy="48" rx="9" ry="5" fill="rgba(255,255,255,0.55)" stroke="none"/>
+            <!-- cara feliz resignada -->
+            <circle cx="53" cy="60" r="3" fill="#1c1410" stroke="none"/>
+            <circle cx="77" cy="60" r="3" fill="#1c1410" stroke="none"/>
+            <path d="M52 76 C60 84 72 84 80 74" fill="none"/>
+            <!-- pañuelo tartan al cuello -->
+            <path d="M40 92 L90 92 L82 108 L48 108 Z" fill="#3d5a2a"/>
+            <line x1="52" y1="92" x2="56" y2="108" stroke="rgba(240,220,90,0.6)" stroke-width="3"/>
+            <line x1="72" y1="92" x2="76" y2="108" stroke="rgba(180,30,40,0.7)" stroke-width="3"/>
+          </g>
+        </svg>
+        <p>El clan <b>McMochileando</b> te da la bienvenida.<br>
+        Romi ya lo publico con el hashtag <i>#MiPeladoEscoces</i>. Tiene 4.000 likes. Sos meme.</p>
+        <div class="am-row">
+          <button class="btn btn-primary" id="am-agu-cutcsa">Continuar con mi nueva vida</button>
+        </div>
+      </div>`, 'theme-escocia');
+    scotScenery();
+    document.getElementById('am-agu-cutcsa').addEventListener('click', agustinCutcsa);
+  }
+
+  function busSvg() {
+    return `
+    <svg viewBox="0 0 240 100" width="120">
+      <g stroke="#1a2a4a" stroke-width="3" stroke-linejoin="round">
+        <rect x="6" y="12" width="228" height="64" rx="10" fill="#f2c530"/>
+        <rect x="6" y="40" width="228" height="14" fill="#2456a0" stroke="none"/>
+        <rect x="196" y="18" width="34" height="26" rx="4" fill="#bfe2f0"/>
+        <rect x="18" y="18" width="150" height="22" rx="4" fill="#bfe2f0"/>
+        <line x1="55" y1="18" x2="55" y2="40"/><line x1="92" y1="18" x2="92" y2="40"/><line x1="129" y1="18" x2="129" y2="40"/>
+        <text x="96" y="68" text-anchor="middle" font-family="Arial" font-size="19" font-weight="900" fill="#fff" stroke="none">CUTCSA</text>
+        <circle cx="50" cy="82" r="13" fill="#22242a"/>
+        <circle cx="185" cy="82" r="13" fill="#22242a"/>
+        <circle cx="50" cy="82" r="5" fill="#8a8f98" stroke="none"/>
+        <circle cx="185" cy="82" r="5" fill="#8a8f98" stroke="none"/>
+      </g>
+    </svg>`;
+  }
+
+  function rubiaSvg() {
+    return `
+    <svg viewBox="0 0 60 90" width="54">
+      <g stroke="#2a1a10" stroke-width="2" stroke-linejoin="round">
+        <!-- pelo rubio largo -->
+        <path fill="#f2d060" d="M30 6 C14 6 10 22 12 38 C13 48 10 56 8 62 L20 58 L20 30 L40 30 L40 58 L52 62 C50 56 47 48 48 38 C50 22 46 6 30 6 Z"/>
+        <circle cx="30" cy="22" r="12" fill="#f0c8a0"/>
+        <circle cx="26" cy="21" r="1.8" fill="#2a1a10" stroke="none"/>
+        <circle cx="34" cy="21" r="1.8" fill="#2a1a10" stroke="none"/>
+        <path d="M26 28 C28 30 32 30 34 28" fill="none"/>
+        <!-- cuerpo -->
+        <path fill="#d96a9c" d="M20 36 L40 36 L44 62 L16 62 Z"/>
+        <rect x="20" y="62" width="7" height="22" rx="3" fill="#3a5a8a"/>
+        <rect x="33" y="62" width="7" height="22" rx="3" fill="#3a5a8a"/>
+        <!-- brazo levantado con celular filmando -->
+        <path fill="#f0c8a0" d="M40 40 C50 34 54 26 55 18 L60 20 C59 30 54 40 44 47 Z"/>
+        <rect x="52" y="8" width="9" height="15" rx="2" fill="#22242a"/>
+      </g>
+    </svg>`;
+  }
+
+  function agustinCutcsa() {
+    show(`
+      <div class="am-stage-card">
+        <h2>🚌 ARRASTRA EL CUTCSA</h2>
+        <p>Ultimo tramite. Hay dos caminos. <b>Arrastra el bondi al camino correcto.</b></p>
+        <div class="am-cutcsa-scene" id="am-cutcsa">
+          <div class="am-lane" id="am-lane-a" style="top:52px"><div class="am-lane-label">CAMINO A</div></div>
+          <div class="am-lane" id="am-lane-b" style="top:170px"><div class="am-lane-label">CAMINO B</div></div>
+          <div class="am-rubia" id="am-rubia" style="right:14px; top:150px">${rubiaSvg()}</div>
+          <div class="am-bus" id="am-bus" style="left:12px; top:112px">${busSvg()}</div>
+        </div>
+        <p class="am-msg" id="am-cutcsa-msg"></p>
+      </div>`, 'theme-escocia');
+    scotScenery();
+
+    const scene = document.getElementById('am-cutcsa');
+    const bus = document.getElementById('am-bus');
+    const msg = document.getElementById('am-cutcsa-msg');
+    let dragging = false;
+    let pos = { x: 12, y: 112 };
+    let last = null;
+    let resolved = false;
+
+    const setBus = (x, y) => {
+      pos = { x, y };
+      bus.style.left = x + 'px';
+      bus.style.top = y + 'px';
+    };
+
+    bus.addEventListener('pointerdown', (e) => {
+      if (resolved) return;
+      dragging = true;
+      bus.classList.add('dragging');
+      bus.setPointerCapture(e.pointerId);
+      last = { x: e.clientX, y: e.clientY };
+    });
+    bus.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      const r = scene.getBoundingClientRect();
+      const k = 1; // escena sin escala interna
+      setBus(
+        Math.max(-10, Math.min(r.width - 110, pos.x + (e.clientX - last.x) * k)),
+        Math.max(0, Math.min(r.height - 70, pos.y + (e.clientY - last.y) * k))
+      );
+      last = { x: e.clientX, y: e.clientY };
+    });
+    bus.addEventListener('pointerup', () => {
+      if (!dragging) return;
+      dragging = false;
+      bus.classList.remove('dragging');
+      const centerY = pos.y + 30;
+      if (centerY >= 40 && centerY <= 135) {
+        // camino A: vacio
+        msg.textContent = 'No es correcto. Pensalo de nuevo, bo.';
+        if (g) g.to(bus, { left: 12, top: 112, duration: 0.7, ease: 'elastic.out(1, 0.6)', onComplete: () => setBus(12, 112) });
+        else setBus(12, 112);
+      } else if (centerY > 135) {
+        // camino B: la rubia del movil
+        resolved = true;
+        setBus(pos.x, 172);
+        const rubia = document.getElementById('am-rubia');
+        const sceneW = scene.getBoundingClientRect().width;
+        if (g) {
+          g.to(bus, { left: sceneW - 130, duration: 1.4, ease: 'power2.in', onComplete: () => {
+            rubia.style.display = 'none';
+            const poof = document.createElement('div');
+            poof.className = 'am-poof';
+            poof.textContent = '💨📱';
+            poof.style.right = '10px';
+            poof.style.top = '150px';
+            scene.appendChild(poof);
+            g.fromTo(poof, { scale: 0.4, opacity: 1 }, { scale: 1.8, opacity: 0, y: -30, duration: 1.1, onComplete: () => poof.remove() });
+            msg.textContent = 'Gracias. Ya no hay nota en el diario. 🙏';
+            setTimeout(() => showEnd('Tramite completado. El bondi siguio su recorrido habitual. Nadie vio nada.'), 2200);
+          }});
+        } else {
+          rubia.style.display = 'none';
+          msg.textContent = 'Gracias. Ya no hay nota en el diario. 🙏';
+          setTimeout(() => showEnd('Tramite completado. El bondi siguio su recorrido habitual. Nadie vio nada.'), 1800);
+        }
+      }
+    });
+  }
+
+  // ============ LUCAS: India ============
 
   function indiaScenery() {
-    document.body.insertAdjacentHTML('beforeend', `
-      <div class="am-chakra"></div>
-      <div class="am-garland">🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼</div>
-      <svg class="am-taj" viewBox="0 0 1200 220" preserveAspectRatio="xMidYMax slice">
+    scenery(`
+      <div class="am-chakra am-scenery"></div>
+      <div class="am-garland am-scenery">🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼🌼</div>
+      <svg class="am-taj am-scenery" viewBox="0 0 1200 220" preserveAspectRatio="xMidYMax slice">
         <g fill="rgba(70, 45, 90, 0.5)">
           <ellipse cx="600" cy="120" rx="70" ry="55"/>
           <rect x="530" y="120" width="140" height="100"/>
@@ -624,43 +931,54 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
           <rect x="736" y="90" width="24" height="130"/>
           <path d="M736 90 a12 12 0 0 1 24 0 Z"/>
           <rect x="360" y="150" width="480" height="70" opacity="0.7"/>
-          <ellipse cx="480" cy="150" rx="26" ry="20"/>
-          <ellipse cx="720" cy="150" rx="26" ry="20"/>
         </g>
       </svg>`);
-    floatEmojis(['🍛', '🌶️', '🫓', '🪷', '🐘'], 14, 8, 15);
+    floatEmojis(['🍛', '🌶️', '🫓', '🪷', '🐘'], 12, 8, 15);
   }
 
   function lucas() {
     show(`
       <div class="am-stage-card">
         <h2 style="font-size:30px">नमस्ते LUCAS</h2>
-        <p>Namaste. El sistema confirmo tu identidad con 99.9% de confianza.<br>
-        <small style="color:#8a6c46">(el 0.1% restante esta esperando en el call center, su llamada es importante para nosotros)</small></p>
-        <p style="margin-top:16px; font-weight:900">Verificacion de tolerancia: ¿que tan picante pedis el curry?</p>
-        <input type="range" min="0" max="3" value="0" step="1" class="am-pota-slider" id="am-curry" style="accent-color:#c05a10">
-        <div class="am-curry-scale"><span>Turista 🍦</span><span>Medio 🌶️</span><span>Picante 🔥</span><span>LUCAS ☠️</span></div>
-        <p class="am-pota-verdict" id="am-curry-msg" style="color:#c05a10"></p>
+        <p><b>Namaste.</b> Hemos detectado <b>ADN indio en el mouse</b> al presionar el boton.<br>
+        No hace falta que lo niegues: el laboratorio no se equivoca.</p>
+        <p style="margin-top:16px; font-weight:900">Verificacion de comodidad: ¿que tan en el molde te sentis hoy?</p>
+        <input type="range" min="0" max="100" value="0" class="am-pota-slider" id="am-molde" style="accent-color:#c05a10">
+        <div class="am-curry-scale"><span>Salgo a veces</span><span>Molde suave</span><span>Molde firme</span><span>MOLDE TOTAL</span></div>
+        <div class="am-umbral" id="am-umbral">Umbral de credibilidad: 30</div>
+        <p class="am-msg" id="am-molde-msg" style="color:#c05a10"></p>
         <div class="am-row">
-          <button class="btn btn-primary" id="am-curry-ok" disabled>Continuar</button>
+          <button class="btn btn-primary" id="am-molde-ok" disabled>Confirmar molde</button>
         </div>
       </div>`, 'theme-india');
     indiaScenery();
 
-    const slider = document.getElementById('am-curry');
-    const msg = document.getElementById('am-curry-msg');
-    const ok = document.getElementById('am-curry-ok');
-    const msgs = [
-      'Turista. Que verguenza para tu familia.',
-      'Medio. El mozo se rie de vos en hindi.',
-      'Picante. Aceptable para un principiante.',
-      'Nivel LUCAS. El chef salio a saludarte con lagrimas en los ojos. Boton desbloqueado por respeto.',
+    const slider = document.getElementById('am-molde');
+    const msg = document.getElementById('am-molde-msg');
+    const ok = document.getElementById('am-molde-ok');
+    const umbralEl = document.getElementById('am-umbral');
+    let umbral = 30;
+
+    const subidas = [
+      'Dale chupapija, sabemos que estas mas en el molde que eso.',
+      '¿Eso nomas? Vos no saliste ni cuando vino el asado gratis. Subi.',
+      'El molde te queda corto todavia. SEGUI SUBIENDO, bo.',
     ];
+    let etapa = 0;
+
     slider.addEventListener('input', () => {
       const v = Number(slider.value);
-      msg.textContent = msgs[v];
-      ok.disabled = v < 3;
-      if (v === 3) floatEmojis(['🔥', '🌶️'], 8, 3, 6);
+      if (v >= umbral && umbral < 100) {
+        umbral = Math.min(100, umbral + 25);
+        umbralEl.textContent = `Umbral de credibilidad: ${umbral}`;
+        msg.textContent = subidas[Math.min(etapa++, subidas.length - 1)];
+        if (g) g.fromTo(umbralEl, { scale: 1.25, backgroundColor: '#ffd9b0' }, { scale: 1, backgroundColor: '#fff3df', duration: 0.5 });
+      }
+      if (v >= 100) {
+        msg.textContent = 'Nivel de molde: ABSOLUTO. Ni el delivery llega tan adentro de una casa.';
+        ok.disabled = false;
+        floatEmojis(['🛋️', '🍛'], 6, 4, 8);
+      }
     });
     ok.addEventListener('click', lucasVaca);
   }
@@ -668,9 +986,8 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
   function lucasVaca() {
     show(`
       <div class="am-stage-card">
-        <h2>Un momento.</h2>
-        <p>Una <b>vaca sagrada</b> se instalo sobre el boton de continuar.<br>
-        No se la puede tocar. Es la ley.</p>
+        <h2>🐄 Un momento.</h2>
+        <p>Las vacas son <b>sagradas en India</b>, asi que no podes tocar "continuar"<br>hasta que le pidas amablemente que se corra.</p>
         <div class="am-row" style="position:relative; min-height:110px; align-items:flex-end">
           <button class="btn btn-primary" id="am-vaca-btn" disabled>Continuar</button>
           <div class="am-cow" id="am-cow" style="left:50%; top:6px; margin-left:-30px">🐄
@@ -680,7 +997,7 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
         <div class="am-row">
           <button class="btn" id="am-vaca-pedir">Pedirle amablemente que se corra</button>
         </div>
-        <p class="am-pota-verdict" id="am-vaca-msg" style="color:#c05a10"></p>
+        <p class="am-msg" id="am-vaca-msg" style="color:#c05a10"></p>
       </div>`, 'theme-india');
     indiaScenery();
 
@@ -704,32 +1021,45 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
         vmsg.textContent = 'La vaca acepto. Karma +100.';
         cow.style.transform = 'translateX(210px) rotate(6deg)';
         pedirBtn.disabled = true;
-        setTimeout(() => {
-          document.getElementById('am-vaca-btn').disabled = false;
-        }, 2200);
+        setTimeout(() => { document.getElementById('am-vaca-btn').disabled = false; }, 2200);
       }
     });
-    document.getElementById('am-vaca-btn').addEventListener('click', lucasSoporte);
+    document.getElementById('am-vaca-btn').addEventListener('click', lucasPais);
   }
 
-  function lucasSoporte() {
+  function lucasPais() {
     show(`
       <div class="am-stage-card">
-        <h2>📞 Soporte tecnico · Mumbai HQ</h2>
-        <p style="text-align:left"><b>Lucas bhai</b> del equipo de soporte dice:</p>
-        <p style="text-align:left; font-style:italic; background:#fffaf0; border:1px solid #cbb37e; border-radius:8px; padding:12px 14px; margin-top:10px">
-        "Hello sir, thank you for holding for only 4 hours sir.<br>
-        Kindly do the needful and restart your Catan sir.<br>
-        Also please rate my service 5 stars sir, my family depends on it sir."</p>
-        <div class="am-row">
-          <button class="btn btn-primary" id="am-lucas-needful">Do the needful</button>
-          <button class="btn" id="am-lucas-5">⭐⭐⭐⭐⭐</button>
+        <h2>Ultima pregunta de verificacion</h2>
+        <p style="font-weight:900; font-size:18px">¿Cual es la forma del pais en el que naciste?</p>
+        <div class="am-row" style="margin-top:18px">
+          <button class="am-pais-card" id="am-pais-uy" title="">
+            <svg viewBox="0 0 120 110" width="120">
+              <path fill="#5a7a9a" stroke="#26221c" stroke-width="2.5" stroke-linejoin="round"
+                d="M30 26 C38 18 50 12 62 14 L78 22 C86 26 92 32 96 40 L100 52 C101 60 99 66 94 72 L78 88 C70 95 60 99 50 96 C38 93 28 84 22 72 C16 60 15 46 20 36 C23 31 26 28 30 26 Z"/>
+            </svg>
+          </button>
+          <button class="am-pais-card" id="am-pais-in" title="">
+            <svg viewBox="0 0 120 110" width="120">
+              <path fill="#5a7a9a" stroke="#26221c" stroke-width="2.5" stroke-linejoin="round"
+                d="M30 18 L52 8 L72 16 L88 10 L102 22 L94 34 L106 42 L98 54 L80 50 L74 66 L66 84 L58 102 L50 84 L44 66 L32 52 L18 42 L26 30 Z"/>
+            </svg>
+          </button>
         </div>
+        <p class="am-msg" id="am-pais-msg" style="color:#c05a10"></p>
       </div>`, 'theme-india');
     indiaScenery();
-    const fin = () => showEnd('Verificacion completa. El chef, la vaca y Lucas bhai aprobaron tu ingreso. Namaste. 🙏');
-    document.getElementById('am-lucas-needful').addEventListener('click', fin);
-    document.getElementById('am-lucas-5').addEventListener('click', fin);
+
+    const msg = document.getElementById('am-pais-msg');
+    document.getElementById('am-pais-uy').addEventListener('click', function () {
+      msg.textContent = 'Incorrecto, bo. Buen intento. El laboratorio ya hablo.';
+      if (g) g.fromTo(this, { x: -8 }, { x: 0, duration: 0.4, ease: 'elastic.out(2, 0.3)' });
+    });
+    document.getElementById('am-pais-in').addEventListener('click', () => {
+      msg.textContent = 'Correcto. En el fondo siempre lo supiste. 🙏';
+      rainEmojis(['🌼', '🪷'], 14, 3, 6);
+      setTimeout(() => showEnd('Verificacion completa. El chef, la vaca y tu ADN aprobaron el ingreso. Namaste.'), 2200);
+    });
   }
 
   // ============ MARTIN: cursor con menisco roto ============
@@ -744,12 +1074,24 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
         <p class="am-note">El cursor entra en calor. No hacer movimientos bruscos.</p>
       </div>`, 'theme-canarias');
 
-    document.body.insertAdjacentHTML('beforeend',
-      `<div class="am-hora-canaria">🕐 Hora canaria: una menos, como siempre</div>`);
+    scenery(`
+      <div class="am-hora-canaria am-scenery">🕐 Hora canaria: una menos, como siempre</div>
+      <div class="am-sol am-scenery"></div>
+      <svg class="am-palmera am-scenery" style="left:4vw" width="120" height="200" viewBox="0 0 120 200">
+        <path d="M58 200 C56 150 60 110 66 80" stroke="#7a5a30" stroke-width="10" fill="none" stroke-linecap="round"/>
+        <g fill="#2e7a3a">
+          <path d="M66 80 C40 60 20 62 6 74 C28 76 46 82 62 92 Z"/>
+          <path d="M66 80 C92 60 112 62 118 76 C96 76 80 84 68 92 Z"/>
+          <path d="M66 80 C60 52 46 40 30 38 C46 52 56 66 62 84 Z"/>
+          <path d="M66 80 C74 52 88 42 104 40 C88 54 76 68 70 84 Z"/>
+        </g>
+        <circle cx="60" cy="88" r="6" fill="#7a5a30"/>
+        <circle cx="72" cy="92" r="6" fill="#7a5a30"/>
+      </svg>`);
 
-    // cursor falso lento: persigue al mouse con lerp muy vago
     const cur = document.createElement('div');
     cur.id = 'am-cursor';
+    cur.className = 'am-scenery';
     cur.innerHTML = `<svg width="30" height="30" viewBox="0 0 28 28">
       <g stroke="#3a2a18" stroke-width="1.1" stroke-linejoin="round" stroke-linecap="round">
         <path fill="#f6ead0" d="M11.2 26 C9.4 26 8.2 25 7.4 23.4 L4.8 18.2 C4.2 17 4.6 15.8 5.6 15.3 C6.5 14.8 7.6 15.1 8.3 16.1 L9.5 17.8 L9.5 5.4 C9.5 4.1 10.4 3.2 11.5 3.2 C12.6 3.2 13.5 4.1 13.5 5.4 L13.5 12.2 L14.6 12.0 C15.6 11.8 16.5 12.4 16.8 13.3 L17.0 13.9 C17.8 13.6 18.8 13.9 19.3 14.7 L19.5 15.1 C20.4 14.9 21.4 15.4 21.7 16.3 L22.6 19.6 C23.3 22.3 21.8 25 19.2 25.8 C18.5 26 17.7 26 16.9 26 Z"/>
@@ -760,11 +1102,11 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
     let cx = mx, cy = my;
     let traveled = 0;
     let lastX = mx, lastY = my;
-    let frozen = false;
+    let lesionado = false;
 
+    // el cursor falso SIEMPRE sigue al mouse (lento); la lesion solo frena el conteo
     addEventListener('pointermove', (e) => {
-      if (frozen) return;
-      traveled += Math.hypot(e.clientX - lastX, e.clientY - lastY);
+      if (!lesionado) traveled += Math.hypot(e.clientX - lastX, e.clientY - lastY);
       lastX = e.clientX;
       lastY = e.clientY;
       mx = e.clientX;
@@ -772,17 +1114,15 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
     });
 
     (function follow() {
-      // lerp bien vago: el cursor rengueando detras del mouse
       cx += (mx - cx) * 0.045;
       cy += (my - cy) * 0.045;
       cur.style.transform = `translate(${cx}px, ${cy}px)`;
-      requestAnimationFrame(follow);
+      if (document.getElementById('am-cursor')) requestAnimationFrame(follow);
     })();
 
-    // tras suficiente recorrido, el cursor "se lesiona"
     const check = setInterval(() => {
-      if (traveled > 2600 && !frozen) {
-        frozen = true;
+      if (traveled > 2600 && !lesionado) {
+        lesionado = true;
         clearInterval(check);
         martinLesion();
       }
@@ -791,8 +1131,8 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
 
   function martinLesion() {
     document.body.insertAdjacentHTML('beforeend', `
-      <div class="am-freeze" id="am-freeze">
-        <div class="am-stage-card" style="width:min(460px,92vw)">
+      <div class="am-freeze am-scenery" id="am-freeze">
+        <div class="am-stage-card" style="width:min(480px,92vw)">
           <h2>⚠️ ¿Por que va lento mi cursor?</h2>
           <p>El sistema detecto una anomalia en la articulacion del puntero.</p>
           <div class="am-diag-bar"><div class="am-diag-fill" id="am-diag"></div></div>
@@ -800,12 +1140,12 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
             <button class="btn btn-primary" id="am-diag-btn">Diagnosticar</button>
           </div>
           <div id="am-diag-result" style="display:none; text-align:left; margin-top:14px; background:#fffaf0; border:1px solid #cbb37e; border-radius:8px; padding:12px 14px">
-            <b>📋 Informe medico</b><br>
-            Paciente: Cursor de Martin<br>
-            Diagnostico: <b>rotura de menisco</b> (compatible con dribbling excesivo)<br>
-            Tratamiento: reposo deportivo 6 a 8 semanas<br>
-            Recomendacion: no correr, no saltar, no jugar al futbol contra gente joven<br>
-            Observacion: el paciente ademas vive en hora canaria, todo le llega una hora despues
+            <b>📋 Informe medico oficial</b><br>
+            Paciente: el cursor de Martin (chupapija con menisco de cristal)<br>
+            Diagnostico: <b>rotura de menisco</b>, compatible con dribbling de veterano<br>
+            Tratamiento: reposo deportivo 6 a 8 semanas, nada de futbol 5<br>
+            Recomendacion: dejate de correr, salame, que ya no tenes edad<br>
+            Observacion: el paciente ademas vive en hora canaria. Todo le llega una hora despues, incluida esta noticia.
           </div>
           <div class="am-row" id="am-diag-continue" style="display:none">
             <button class="btn btn-primary" id="am-diag-ok">Aceptar la lesion</button>
@@ -820,7 +1160,8 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
       setTimeout(() => {
         document.getElementById('am-diag-result').style.display = 'block';
         document.getElementById('am-diag-continue').style.display = 'flex';
-        document.querySelector('#am-cursor .am-venda').style.display = 'block'; // vendita
+        const venda = document.querySelector('#am-cursor .am-venda');
+        if (venda) venda.style.display = 'block';
       }, 3200);
     });
     document.getElementById('am-diag-ok').addEventListener('click', () => {
@@ -829,27 +1170,28 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
     });
   }
 
-  // ============ RUIBAL: contrato de donacion ============
+  // ============ RUIBAL: contrato ============
 
   function ruibal() {
     show(`
       <div class="am-stage-card am-contrato">
         <h2>CONTRATO DE DONACION IRREVOCABLE<br>EXPEDIENTE N° 57-8/2026</h2>
-        <p class="am-clausula"><b>COMPARECE:</b> el Sr. RUIBAL, en adelante "EL TERRATENIENTE", quien acredita mediante escrituras, boletas de OSE y puro caradurismo la titularidad de CINCUENTA Y SIETE (57) inmuebles.</p>
-        <p class="am-clausula"><b>CLAUSULA PRIMERA:</b> EL TERRATENIENTE dona, cede y transfiere a titulo gratuito OCHO (8) de sus CINCUENTA Y SIETE (57) casas a LOS GURISES, quedandose con un modesto remanente de CUARENTA Y NUEVE (49) propiedades para sobrellevar la pobreza.</p>
-        <p class="am-clausula"><b>CLAUSULA SEGUNDA:</b> EL TERRATENIENTE se compromete a no llorar por ello, ni mencionarlo en asados, ni usarlo como excusa cuando pierda en el Catan.</p>
-        <p class="am-clausula"><b>CLAUSULA TERCERA:</b> queda inhabilitado DE POR VIDA para jugar al Monopoly, por razones obvias de conflicto de interes.</p>
-        <p class="am-clausula"><b>CLAUSULA CUARTA:</b> sin la firma del presente, el acceso al juego permanecera BLOQUEADO. El escribano tiene todo el dia.</p>
+        <p class="am-clausula"><b>COMPARECE:</b> el Sr. RUIBAL, en adelante "EL CULOROTO TERRATENIENTE", quien acredita mediante escrituras, boletas de OSE y puro caradurismo la titularidad de CINCUENTA Y SIETE (57) inmuebles. Cincuenta y siete, bo. CINCUENTA Y SIETE.</p>
+        <p class="am-clausula"><b>CLAUSULA PRIMERA:</b> EL CULOROTO TERRATENIENTE dona, cede y transfiere a titulo gratuito OCHO (8) de sus CINCUENTA Y SIETE (57) casas a LOS GURISES, que la vienen remando mientras vos cobras alquileres, chupapija.</p>
+        <p class="am-clausula"><b>CLAUSULA SEGUNDA:</b> EL CULOROTO TERRATENIENTE se compromete a no llorar por ello, ni hacerse la victima en el asado, ni decir "es que yo la reme" cuando todos sabemos que heredo tres.</p>
+        <p class="am-clausula"><b>CLAUSULA TERCERA:</b> con el remanente de CUARENTA Y NUEVE (49) propiedades, EL CULOROTO TERRATENIENTE declara que "va a tener que ajustarse el cinturon". El escribano se rio al escribir esto.</p>
+        <p class="am-clausula"><b>CLAUSULA CUARTA:</b> sin la firma del presente, no jugas nada, culoroto. El escribano tiene todo el dia y vos tenes 57 boletas de OSE por pagar.</p>
         <div class="am-firma-zone" id="am-firma-zone">
           <canvas id="am-firma" width="520" height="120"></canvas>
-          <div class="am-firma-hint" id="am-firma-hint">Firme aqui con el mouse, señor terrateniente</div>
+          <div class="am-firma-hint" id="am-firma-hint">Firma aca, bo. Con la mano de cobrar alquileres.</div>
         </div>
         <div class="am-row">
           <button class="btn" id="am-ruibal-borrar">Borrar firma</button>
           <button class="btn btn-primary" id="am-ruibal-firmar">Protocolizar y entrar</button>
         </div>
-        <p class="am-pota-verdict" id="am-ruibal-msg"></p>
+        <p class="am-msg" id="am-ruibal-msg"></p>
       </div>`, 'theme-legal');
+    floatEmojis(['🏠', '📜'], 6, 10, 18);
 
     const canvas = document.getElementById('am-firma');
     const zone = document.getElementById('am-firma-zone');
@@ -886,14 +1228,14 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ink = 0;
       hint.style.display = 'flex';
-      document.getElementById('am-ruibal-msg').textContent = '¿Se arrepintio? Las 8 casas lo siguen esperando.';
+      document.getElementById('am-ruibal-msg').textContent = '¿Te arrepentiste, culoroto? Las 8 casas te siguen esperando.';
     });
 
     let intentos = 0;
     const rechazos = [
-      'Sin firma no hay juego. El escribano lo esta mirando fijo.',
-      'Eso no es una firma, es un suspiro. Firme con conviccion.',
-      'El escribano suspiro. Intente de nuevo, con las 57 escrituras en la mano.',
+      'Sin firma no hay juego, bo. El escribano te esta mirando fijo.',
+      'Eso no es una firma, es un electrocardiograma. Firma bien, chupapija.',
+      'El escribano dijo que ni su nieto de 4 años firma tan mal. Y el nieto no tiene 57 casas.',
     ];
     document.getElementById('am-ruibal-firmar').addEventListener('click', () => {
       if (ink < 40) {
@@ -901,15 +1243,17 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
         return;
       }
       zone.insertAdjacentHTML('beforeend', '<div class="am-sello">PROTOCOLIZADO</div>');
-      document.getElementById('am-ruibal-msg').textContent = 'Donacion registrada. Los gurises agradecen.';
+      document.getElementById('am-ruibal-msg').textContent = 'Donacion registrada. Los gurises agradecen, culoroto generoso.';
       setTimeout(() =>
-        showEnd('8 casas menos, te quedan 49. Vas a estar bien. Los gurises ya eligieron las mejores.'), 1800);
+        showEnd('8 casas menos, te quedan 49. Vas a estar bien, bo. Los gurises ya eligieron las mejores.'), 1800);
     });
   }
 
-  // QA directo: /amigos?who=gaston
+  // QA directo: /amigos?who=nombre (o escenas profundas: souto, cutcsa, highlands, pais, molde)
   const who = new URLSearchParams(location.search).get('who');
+  const deep = { souto: diegoSouto, cutcsa: agustinCutcsa, highlands: agustinHighlands, pais: lucasPais, molde: lucas };
   if (who && FRIENDS.some((f) => f.id === who)) start(who);
+  else if (who && deep[who]) deep[who]();
 })();
 </script>
 </body>
