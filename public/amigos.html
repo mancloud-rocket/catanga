@@ -240,6 +240,95 @@ body.theme-india { background: linear-gradient(180deg, #f9963a 0%, #f6a94e 32%, 
 }
 .am-pais-card svg { display: block; margin: 0 auto; }
 
+/* --- LUCASBET sportsbook --- */
+.am-bet-app {
+  background: #0d1620; border-radius: 12px; overflow: hidden;
+  border: 1px solid #1e3040; text-align: left;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  box-shadow: 0 12px 34px rgba(0,0,0,0.5);
+  margin-top: 14px;
+}
+.am-bet-head {
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(90deg, #ff6b00, #ff8f2d);
+  padding: 10px 14px;
+}
+.am-bet-logo { font-weight: 900; font-size: 19px; color: #fff; letter-spacing: 0.5px; font-style: italic; }
+.am-bet-logo span { color: #0d1620; }
+.am-bet-saldo { background: rgba(13,22,32,0.85); color: #7fd490; font-weight: 700; font-size: 13px; padding: 5px 12px; border-radius: 999px; }
+.am-bet-live {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; background: #101d2a; color: #8fa4b8;
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  border-bottom: 1px solid #1e3040;
+}
+.am-bet-live i {
+  width: 8px; height: 8px; border-radius: 50%; background: #ff3b3b; display: inline-block;
+  animation: amLivePulse 1.2s ease-in-out infinite;
+}
+@keyframes amLivePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+.am-match {
+  display: grid; grid-template-columns: 1fr repeat(3, 56px);
+  gap: 6px; align-items: center;
+  padding: 9px 12px; border-bottom: 1px solid #16232f;
+  position: relative;
+}
+.am-match-teams { color: #e8eef4; font-size: 13px; font-weight: 600; line-height: 1.3; }
+.am-match-league { color: #5d7488; font-size: 10.5px; font-weight: 400; }
+.am-odd {
+  background: #16232f; border: 1px solid #24384a; border-radius: 6px;
+  color: #cfe0ee; font-size: 12.5px; font-weight: 700;
+  padding: 7px 0 5px; text-align: center; cursor: pointer;
+  transition: background 0.12s, transform 0.08s;
+  font-family: inherit;
+}
+.am-odd small { display: block; font-size: 9px; color: #5d7488; font-weight: 600; }
+.am-odd:hover { background: #1e3140; transform: translateY(-1px); }
+.am-odd.sel { background: #ffd23e; border-color: #ffb800; color: #0d1620; }
+.am-odd.sel small { color: #5a4a10; }
+.am-odd.lost { background: #3a1418; border-color: #7a1f16; color: #ff8f8f; text-decoration: line-through; }
+.am-odd:disabled { cursor: default; }
+.am-match-score {
+  position: absolute; right: 190px; top: 50%; transform: translateY(-50%);
+  background: #ff3b3b; color: #fff; font-weight: 900; font-size: 13px;
+  padding: 3px 9px; border-radius: 5px;
+  animation: capPop 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.am-bet-slip {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 11px 14px;
+  background: #101d2a; border-top: 2px solid #ff6b00;
+}
+.am-bet-slip-info { color: #8fa4b8; font-size: 12px; line-height: 1.5; }
+.am-bet-slip-info b { color: #ffd23e; font-size: 15px; }
+.am-bet-btn {
+  background: linear-gradient(180deg, #35c05a, #219442);
+  color: #fff; font-weight: 900; font-size: 14px;
+  border: none; border-radius: 8px; padding: 11px 22px;
+  cursor: pointer; font-family: inherit;
+  box-shadow: 0 3px 0 #17672d;
+}
+.am-bet-btn:disabled { filter: grayscale(0.9); opacity: 0.5; cursor: not-allowed; }
+.am-bet-bombazo {
+  text-align: center; padding: 8px; font-weight: 900; font-size: 15px;
+  color: #ffd23e; background: rgba(255,210,62,0.08);
+  animation: amLivePulse 1s ease-in-out infinite;
+}
+
+/* --- Ruibal burbuja --- */
+body.theme-burbuja { background: linear-gradient(180deg, #7ab8dc 0%, #a8d4e8 55%, #cde8f2 100%); }
+.am-burbuja {
+  position: fixed; left: 50%; bottom: -240px; margin-left: -110px;
+  width: 220px; height: 220px; z-index: 8; pointer-events: none;
+}
+.am-burbuja .am-pompa {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.14) 22%, rgba(180,220,250,0.16) 60%, rgba(140,190,230,0.36) 100%);
+  border: 2px solid rgba(255,255,255,0.65);
+  box-shadow: inset -12px -14px 30px rgba(120,180,220,0.4), 0 10px 30px rgba(0,60,100,0.15);
+}
+.am-burbuja svg { position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%); }
+
 /* --- Martin canarias --- */
 body.theme-canarias {
   background: linear-gradient(180deg, #3a7ca8 0%, #6fb3d4 55%, #e8d9a8 56%, #d4be85 100%);
@@ -483,7 +572,7 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
       <div class="am-stage-card">
         <div class="am-banco-logo">BANCO DE CATAN · PRIVATE WEALTH</div>
         <h2>Estimado Diego,</h2>
-        <p style="text-align:left">Detectamos que <b>tenes mas plata que todos los demas</b>. Asi que lamentablemente, para equiparar la situacion, se te aplicara el <b>IPC (Impuesto Progresivo al Cheto)</b>, por lo cual vas a empezar la partida con <b>la mitad de los recursos</b>.</p>
+        <p style="text-align:left">Detectamos que <b>ganas el doble que los demas</b>. Asi que lamentablemente, para equiparar la situacion, se te aplicara el <b>IPC (Impuesto Progresivo al Cheto)</b>, por lo cual vas a empezar la partida con <b>la mitad de los recursos</b>.</p>
         <div class="am-wealth-bar"><div class="am-wealth-fill" id="am-wealth" style="width:100%">30/30</div></div>
         <p class="am-note" style="text-align:right">patrimonio auditado en tiempo real</p>
         <p style="margin-top:10px">Podes apelar la decision. <b>Te aconsejamos hacerlo.</b></p>
@@ -491,6 +580,7 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
           <button class="btn btn-primary" id="am-diego-apelar">Apelar</button>
           <button class="btn" id="am-diego-ok">Aceptar mi destino</button>
         </div>
+        <p class="am-msg" id="am-diego-msg"></p>
       </div>`, 'theme-banco');
     diegoScenery();
 
@@ -499,8 +589,13 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
       if (bar) { bar.style.transition = 'width 2s cubic-bezier(0.6,0,0.3,1)'; bar.style.width = '50%'; bar.textContent = '15/30'; }
     }, 700);
 
-    document.getElementById('am-diego-ok').addEventListener('click', () =>
-      showEnd('Arrancas con 15 recursos. La revolucion te saluda, Diego.'));
+    // no existe la resignacion: el tribunal te obliga a apelar
+    document.getElementById('am-diego-ok').addEventListener('click', function () {
+      document.getElementById('am-diego-msg').textContent =
+        'El tribunal no acepta resignaciones. Vas a apelar. A las piñas.';
+      this.disabled = true;
+      setTimeout(diegoSouto, 1600);
+    });
     document.getElementById('am-diego-apelar').addEventListener('click', diegoSouto);
   }
 
@@ -702,10 +797,7 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
       <div class="am-stage-card am-invite">
         <h2>El Cura Martin Herbert</h2>
         <p class="am-script">tiene el honor de consultarle:</p>
-        <p class="am-script" style="margin-top:12px">Agustin, ¿aceptas a <b>@romimochileando</b> como tu legitima esposa,<br>
-        en la salud y en los hostels,<br>
-        en el wifi gratis y en la escala de 14 horas en Estambul,<br>
-        hasta que el proximo vuelo low-cost los separe?</p>
+        <p class="am-script" style="margin-top:12px">Agustin, ¿aceptas a <b>@romimochileando</b><br>como tu legitima esposa?</p>
         <div class="am-row">
           <button class="btn btn-primary" id="am-agu-si">Si, acepto</button>
           <button class="btn" id="am-agu-no">No acepto</button>
@@ -781,8 +873,7 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
             <line x1="72" y1="92" x2="76" y2="108" stroke="rgba(180,30,40,0.7)" stroke-width="3"/>
           </g>
         </svg>
-        <p>El clan <b>McMochileando</b> te da la bienvenida.<br>
-        Romi ya lo publico con el hashtag <i>#MiPeladoEscoces</i>. Tiene 4.000 likes. Sos meme.</p>
+        <p>Romi ya lo publico con el hashtag <i>#MiPeladoEscoces</i>. Tiene 4.000 likes. Sos meme.</p>
         <div class="am-row">
           <button class="btn btn-primary" id="am-agu-cutcsa">Continuar con mi nueva vida</button>
         </div>
@@ -980,51 +1071,148 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
         floatEmojis(['🛋️', '🍛'], 6, 4, 8);
       }
     });
-    ok.addEventListener('click', lucasVaca);
+    ok.addEventListener('click', lucasBet);
   }
 
-  function lucasVaca() {
+  // ---- LUCASBET: el sportsbook de la perdicion ----
+
+  const BET_MATCHES = [
+    { league: 'Liga Uruguaya · hoy 20:00', teams: 'Peñarol - Nacional' },
+    { league: 'Liga Uruguaya · hoy 21:30', teams: 'Defensor Sporting - Danubio' },
+    { league: 'Liga del Molde · EN VIVO', teams: 'Deportivo Molde - Atletico Sofa', live: true },
+    { league: 'Superliga de India · hoy 16:00', teams: 'Curry United - Mumbai City' },
+    { league: 'Champions del Barrio · hoy 22:15', teams: 'La Cachila FC - Bondi Juniors' },
+  ];
+
+  let betSaldo = 500;
+  let betIntentos = 0;
+
+  function lucasBet() {
+    betSaldo = 500;
+    betIntentos = 0;
+    lucasBetRound();
+  }
+
+  function lucasBetRound() {
+    const odds = BET_MATCHES.map(() => [
+      (1.3 + Math.random() * 1.4).toFixed(2),
+      (2.6 + Math.random() * 1.2).toFixed(2),
+      (1.8 + Math.random() * 2.4).toFixed(2),
+    ]);
+
     show(`
-      <div class="am-stage-card">
-        <h2>🐄 Un momento.</h2>
-        <p>Las vacas son <b>sagradas en India</b>, asi que no podes tocar "continuar"<br>hasta que le pidas amablemente que se corra.</p>
-        <div class="am-row" style="position:relative; min-height:110px; align-items:flex-end">
-          <button class="btn btn-primary" id="am-vaca-btn" disabled>Continuar</button>
-          <div class="am-cow" id="am-cow" style="left:50%; top:6px; margin-left:-30px">🐄
-            <div class="am-cow-bubble" id="am-cow-bubble">muuu (no)</div>
+      <div class="am-stage-card" style="padding:24px 26px">
+        <h2 style="margin-bottom:2px">Ultima verificacion: talento predictivo</h2>
+        <p style="font-size:13.5px">Completa la cuponera, crack. Que puede salir mal.</p>
+        <div class="am-bet-app">
+          <div class="am-bet-head">
+            <div class="am-bet-logo">LUCAS<span>BET</span> ⚽</div>
+            <div class="am-bet-saldo">Saldo: $U <span id="am-bet-saldo">${betSaldo}</span></div>
+          </div>
+          <div class="am-bet-live"><i></i> Apuestas deportivas · Cuotas mejoradas solo por hoy</div>
+          <div id="am-bet-matches">
+            ${BET_MATCHES.map((m, i) => `
+              <div class="am-match" data-i="${i}">
+                <div>
+                  <div class="am-match-league">${m.league}</div>
+                  <div class="am-match-teams">${m.teams}</div>
+                </div>
+                <button class="am-odd" data-i="${i}" data-pick="0"><small>1</small>${odds[i][0]}</button>
+                <button class="am-odd" data-i="${i}" data-pick="1"><small>X</small>${odds[i][1]}</button>
+                <button class="am-odd" data-i="${i}" data-pick="2"><small>2</small>${odds[i][2]}</button>
+              </div>`).join('')}
+          </div>
+          <div class="am-bet-bombazo" id="am-bet-bombazo" style="display:none">🔥 HOY PEGAS EL BOMBAZO PAPA 🔥</div>
+          <div class="am-bet-slip">
+            <div class="am-bet-slip-info">
+              Selecciones: <span id="am-bet-count">0</span>/5 · Cuota total: <b id="am-bet-cuota">1.00</b><br>
+              Ganancia potencial: <b id="am-bet-gan">$U 0</b>
+            </div>
+            <button class="am-bet-btn" id="am-bet-go" disabled>APOSTAR $U 100</button>
           </div>
         </div>
-        <div class="am-row">
-          <button class="btn" id="am-vaca-pedir">Pedirle amablemente que se corra</button>
-        </div>
-        <p class="am-msg" id="am-vaca-msg" style="color:#c05a10"></p>
+        <p class="am-msg" id="am-bet-msg" style="color:#c05a10"></p>
       </div>`, 'theme-india');
     indiaScenery();
 
-    const cow = document.getElementById('am-cow');
-    const bubble = document.getElementById('am-cow-bubble');
-    const pedirBtn = document.getElementById('am-vaca-pedir');
-    const vmsg = document.getElementById('am-vaca-msg');
-    let intentos = 0;
-    pedirBtn.addEventListener('click', () => {
-      intentos++;
-      if (intentos === 1) {
-        bubble.style.opacity = 1;
-        vmsg.textContent = 'La vaca lo esta considerando.';
-        setTimeout(() => { bubble.style.opacity = 0; }, 1500);
-      } else if (intentos === 2) {
-        bubble.textContent = 'muu (dale)';
-        bubble.style.opacity = 1;
-        vmsg.textContent = 'Esta negociando. Ofrecele respeto.';
-        setTimeout(() => { bubble.style.opacity = 0; }, 1500);
-      } else {
-        vmsg.textContent = 'La vaca acepto. Karma +100.';
-        cow.style.transform = 'translateX(210px) rotate(6deg)';
-        pedirBtn.disabled = true;
-        setTimeout(() => { document.getElementById('am-vaca-btn').disabled = false; }, 2200);
-      }
+    const picks = new Array(5).fill(null);
+    const cuotaEl = document.getElementById('am-bet-cuota');
+    const countEl = document.getElementById('am-bet-count');
+    const ganEl = document.getElementById('am-bet-gan');
+    const goBtn = document.getElementById('am-bet-go');
+    const bombazo = document.getElementById('am-bet-bombazo');
+    const msg = document.getElementById('am-bet-msg');
+
+    const updateSlip = () => {
+      const sel = picks.filter((p) => p !== null);
+      countEl.textContent = sel.length;
+      const cuota = picks.reduce((acc, p, i) => p === null ? acc : acc * Number(odds[i][p]), 1);
+      cuotaEl.textContent = cuota.toFixed(2);
+      ganEl.textContent = '$U ' + Math.round(100 * (sel.length ? cuota : 0));
+      const full = sel.length === 5;
+      goBtn.disabled = !full;
+      bombazo.style.display = full ? 'block' : 'none';
+    };
+
+    for (const btn of document.querySelectorAll('.am-odd')) {
+      btn.addEventListener('click', () => {
+        const i = Number(btn.dataset.i);
+        picks[i] = Number(btn.dataset.pick);
+        for (const other of document.querySelectorAll(`.am-odd[data-i="${i}"]`)) other.classList.remove('sel');
+        btn.classList.add('sel');
+        updateSlip();
+      });
+    }
+
+    goBtn.addEventListener('click', () => {
+      betIntentos++;
+      betSaldo -= 100;
+      document.getElementById('am-bet-saldo').textContent = betSaldo;
+      goBtn.disabled = true;
+      bombazo.style.display = 'none';
+      for (const b of document.querySelectorAll('.am-odd')) b.disabled = true;
+      msg.textContent = 'Partidos en juego...';
+
+      // resuelve los partidos uno a uno: SIEMPRE pierde
+      const SCORES = [['2-0', '1-1', '0-2'], ['3-1', '0-0', '1-3'], ['1-0', '2-2', '0-1']];
+      BET_MATCHES.forEach((m, i) => {
+        setTimeout(() => {
+          const others = [0, 1, 2].filter((r) => r !== picks[i]);
+          const result = others[Math.floor(Math.random() * 2)];
+          const row = document.querySelector(`.am-match[data-i="${i}"]`);
+          const score = document.createElement('div');
+          score.className = 'am-match-score';
+          score.textContent = SCORES[i % 3][result];
+          row.appendChild(score);
+          const pickedBtn = document.querySelector(`.am-odd[data-i="${i}"][data-pick="${picks[i]}"]`);
+          pickedBtn.classList.remove('sel');
+          pickedBtn.classList.add('lost');
+          if (g) g.fromTo(row, { x: -5 }, { x: 0, duration: 0.3, ease: 'elastic.out(2,0.4)' });
+        }, 700 + i * 750);
+      });
+
+      setTimeout(() => {
+        if (betIntentos < 3) {
+          msg.innerHTML = `Perdiste las 5, crack. Saldo: $U ${betSaldo}. <b>La proxima seguro.</b>`;
+          const retry = document.createElement('button');
+          retry.className = 'btn btn-primary';
+          retry.textContent = 'Intentar de nuevo (esta si)';
+          retry.style.marginTop = '10px';
+          msg.insertAdjacentElement('afterend', retry);
+          retry.addEventListener('click', lucasBetRound);
+        } else {
+          msg.innerHTML = '';
+          const fin = document.createElement('div');
+          fin.innerHTML = `
+            <p style="font-size:19px; font-weight:900; color:#a32c22; margin-top:14px">
+            Amigo, te lo decimos de corazon.<br>DEJA LAS APUESTAS.</p>
+            <p class="am-note">Saldo final: $U ${betSaldo} · Perdido en 4 minutos: $U 300 · Bombazos pegados: 0</p>
+            <button class="btn btn-primary" style="margin-top:8px" id="am-bet-fin">Aceptar mi problema</button>`;
+          msg.insertAdjacentElement('afterend', fin);
+          document.getElementById('am-bet-fin').addEventListener('click', lucasPais);
+        }
+      }, 700 + 5 * 750 + 600);
     });
-    document.getElementById('am-vaca-btn').addEventListener('click', lucasPais);
   }
 
   function lucasPais() {
@@ -1113,10 +1301,15 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
       my = e.clientY;
     });
 
+    window.__amCursorRoto = false;
     (function follow() {
-      cx += (mx - cx) * 0.045;
-      cy += (my - cy) * 0.045;
-      cur.style.transform = `translate(${cx}px, ${cy}px)`;
+      if (!window.__amCursorRoto) {
+        // rengo despues de la lesion (mitad de velocidad), pero se mueve
+        const k = lesionado ? 0.022 : 0.045;
+        cx += (mx - cx) * k;
+        cy += (my - cy) * k;
+        cur.style.transform = `translate(${cx}px, ${cy}px)`;
+      }
       if (document.getElementById('am-cursor')) requestAnimationFrame(follow);
     })();
 
@@ -1132,41 +1325,32 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
   function martinLesion() {
     document.body.insertAdjacentHTML('beforeend', `
       <div class="am-freeze am-scenery" id="am-freeze">
-        <div class="am-stage-card" style="width:min(480px,92vw)">
-          <h2>⚠️ ¿Por que va lento mi cursor?</h2>
-          <p>El sistema detecto una anomalia en la articulacion del puntero.</p>
-          <div class="am-diag-bar"><div class="am-diag-fill" id="am-diag"></div></div>
-          <div class="am-row">
-            <button class="btn btn-primary" id="am-diag-btn">Diagnosticar</button>
-          </div>
-          <div id="am-diag-result" style="display:none; text-align:left; margin-top:14px; background:#fffaf0; border:1px solid #cbb37e; border-radius:8px; padding:12px 14px">
-            <b>📋 Informe medico oficial</b><br>
-            Paciente: el cursor de Martin (chupapija con menisco de cristal)<br>
-            Diagnostico: <b>rotura de menisco</b>, compatible con dribbling de veterano<br>
-            Tratamiento: reposo deportivo 6 a 8 semanas, nada de futbol 5<br>
-            Recomendacion: dejate de correr, salame, que ya no tenes edad<br>
-            Observacion: el paciente ademas vive en hora canaria. Todo le llega una hora despues, incluida esta noticia.
-          </div>
-          <div class="am-row" id="am-diag-continue" style="display:none">
-            <button class="btn btn-primary" id="am-diag-ok">Aceptar la lesion</button>
+        <div class="am-stage-card" style="width:min(500px,92vw)">
+          <h2 style="font-size:28px">⚠️ UPS</h2>
+          <p style="font-size:20px; font-weight:900">TU CURSOR SE ROMPIO EL MENISCO<br>Y YA NO SE PUEDE MOVER.</p>
+          <p class="am-note" id="am-muleta-hint" style="opacity:0; transition: opacity 0.6s">
+            (bueno dale, te prestamos una muleta)</p>
+          <div class="am-row" id="am-muleta-row" style="display:none">
+            <button class="btn btn-primary" id="am-muleta-ok">Seguir rengueando 🩹</button>
           </div>
         </div>
       </div>`);
 
-    document.getElementById('am-diag-btn').addEventListener('click', function () {
-      this.disabled = true;
-      this.textContent = 'Haciendo resonancia...';
-      document.getElementById('am-diag').style.width = '100%';
-      setTimeout(() => {
-        document.getElementById('am-diag-result').style.display = 'block';
-        document.getElementById('am-diag-continue').style.display = 'flex';
-        const venda = document.querySelector('#am-cursor .am-venda');
-        if (venda) venda.style.display = 'block';
-      }, 3200);
-    });
-    document.getElementById('am-diag-ok').addEventListener('click', () => {
+    // el cursor deja de moverse en serio (menisco roto)
+    window.__amCursorRoto = true;
+    const venda = document.querySelector('#am-cursor .am-venda');
+    if (venda) venda.style.display = 'block';
+
+    // piedad diferida: a los 6 segundos aparece la muleta
+    setTimeout(() => {
+      document.getElementById('am-muleta-hint').style.opacity = 1;
+      document.getElementById('am-muleta-row').style.display = 'flex';
+    }, 6000);
+
+    document.getElementById('am-muleta-ok').addEventListener('click', () => {
+      window.__amCursorRoto = false; // vuelve, pero rengo
       document.getElementById('am-freeze').remove();
-      showEnd('Podes jugar, pero el cursor sigue lento: esta en recuperacion. Saludos a Canarias. 🩹');
+      showEnd('El cursor sigue en recuperacion. Saludos a Canarias. 🩹');
     });
   }
 
@@ -1176,11 +1360,10 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
     show(`
       <div class="am-stage-card am-contrato">
         <h2>CONTRATO DE DONACION IRREVOCABLE<br>EXPEDIENTE N° 57-8/2026</h2>
-        <p class="am-clausula"><b>COMPARECE:</b> el Sr. RUIBAL, en adelante "EL CULOROTO TERRATENIENTE", quien acredita mediante escrituras, boletas de OSE y puro caradurismo la titularidad de CINCUENTA Y SIETE (57) inmuebles. Cincuenta y siete, bo. CINCUENTA Y SIETE.</p>
+        <p class="am-clausula"><b>COMPARECE:</b> el Sr. RUIBAL, en adelante "EL CULOROTO TERRATENIENTE", quien acredita mediante escrituras y puro caradurismo la titularidad de CINCUENTA Y SIETE (57) inmuebles. Cincuenta y siete, bo. CINCUENTA Y SIETE.</p>
         <p class="am-clausula"><b>CLAUSULA PRIMERA:</b> EL CULOROTO TERRATENIENTE dona, cede y transfiere a titulo gratuito OCHO (8) de sus CINCUENTA Y SIETE (57) casas a LOS GURISES, que la vienen remando mientras vos cobras alquileres, chupapija.</p>
-        <p class="am-clausula"><b>CLAUSULA SEGUNDA:</b> EL CULOROTO TERRATENIENTE se compromete a no llorar por ello, ni hacerse la victima en el asado, ni decir "es que yo la reme" cuando todos sabemos que heredo tres.</p>
-        <p class="am-clausula"><b>CLAUSULA TERCERA:</b> con el remanente de CUARENTA Y NUEVE (49) propiedades, EL CULOROTO TERRATENIENTE declara que "va a tener que ajustarse el cinturon". El escribano se rio al escribir esto.</p>
-        <p class="am-clausula"><b>CLAUSULA CUARTA:</b> sin la firma del presente, no jugas nada, culoroto. El escribano tiene todo el dia y vos tenes 57 boletas de OSE por pagar.</p>
+        <p class="am-clausula"><b>CLAUSULA SEGUNDA:</b> EL CULOROTO TERRATENIENTE se compromete a no llorar por ello, ni decir que la tuvo dificil y que salio de abajo remando.</p>
+        <p class="am-clausula"><b>CLAUSULA TERCERA:</b> sin la firma del presente, no jugas nada, culoroto. El escribano tiene todo el dia.</p>
         <div class="am-firma-zone" id="am-firma-zone">
           <canvas id="am-firma" width="520" height="120"></canvas>
           <div class="am-firma-hint" id="am-firma-hint">Firma aca, bo. Con la mano de cobrar alquileres.</div>
@@ -1244,14 +1427,60 @@ body.theme-legal { background: radial-gradient(ellipse at 50% 20%, #4a4238, #262
       }
       zone.insertAdjacentHTML('beforeend', '<div class="am-sello">PROTOCOLIZADO</div>');
       document.getElementById('am-ruibal-msg').textContent = 'Donacion registrada. Los gurises agradecen, culoroto generoso.';
-      setTimeout(() =>
-        showEnd('8 casas menos, te quedan 49. Vas a estar bien, bo. Los gurises ya eligieron las mejores.'), 1800);
+      setTimeout(ruibalBurbuja, 1800);
     });
+  }
+
+  // Ruibal se va volando en una burbuja
+  function ruibalBurbuja() {
+    show(`
+      <div class="am-stage-card" style="opacity:0" id="am-burbuja-card">
+        <h2 style="font-size:30px">¡NOOOOO!</h2>
+        <p style="font-size:18px">No podras jugar porque la burbuja se fue <b>muy lejos de la tierra</b>.<br>
+        <i>(como todas tus opiniones)</i></p>
+        <div class="am-row">
+          <button class="btn btn-primary" id="am-burbuja-ok">Volver a la tierra</button>
+        </div>
+      </div>`, 'theme-burbuja');
+    floatEmojis(['☁️'], 6, 14, 22);
+
+    // Ruibal adentro de la pompa, abrazado a sus escrituras
+    scenery(`
+      <div class="am-burbuja am-scenery" id="am-burbuja">
+        <div class="am-pompa"></div>
+        <svg viewBox="0 0 120 140" width="120">
+          <g stroke="#2a1a10" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
+            <circle cx="60" cy="38" r="24" fill="#e8b48c"/>
+            <path fill="#5a4632" d="M38 32 C40 16 80 16 82 32 C74 26 46 26 38 32 Z"/>
+            <circle cx="52" cy="38" r="2.6" fill="#2a1a10" stroke="none"/>
+            <circle cx="68" cy="38" r="2.6" fill="#2a1a10" stroke="none"/>
+            <path d="M50 50 C55 46 65 46 70 50" fill="none"/>
+            <path fill="#3a5a8a" d="M40 62 L80 62 L86 112 L34 112 Z"/>
+            <path fill="#f6efdc" d="M48 74 L72 74 L74 100 L46 100 Z" transform="rotate(-6 60 88)"/>
+            <text x="60" y="90" text-anchor="middle" font-size="9" font-family="Courier New" font-weight="bold" fill="#26221c" stroke="none" transform="rotate(-6 60 88)">49</text>
+            <path fill="#e8b48c" d="M40 66 C30 74 26 84 28 92 L36 88 C36 80 40 74 46 70 Z"/>
+            <path fill="#e8b48c" d="M80 66 C90 74 94 84 92 92 L84 88 C84 80 80 74 74 70 Z"/>
+          </g>
+        </svg>
+      </div>`);
+
+    const bub = document.getElementById('am-burbuja');
+    const card = document.getElementById('am-burbuja-card');
+    if (g) {
+      g.to(bub, { bottom: '110vh', duration: 6, ease: 'power1.in' });
+      g.to(bub, { x: 40, duration: 1.6, yoyo: true, repeat: 4, ease: 'sine.inOut' });
+      g.to(card, { opacity: 1, duration: 0.6, delay: 4.2 });
+    } else {
+      bub.style.bottom = '110vh';
+      card.style.opacity = 1;
+    }
+    document.getElementById('am-burbuja-ok').addEventListener('click', () =>
+      showEnd('La burbuja aterrizo. 8 casas menos, te quedan 49. Vas a estar bien, bo.'));
   }
 
   // QA directo: /amigos?who=nombre (o escenas profundas: souto, cutcsa, highlands, pais, molde)
   const who = new URLSearchParams(location.search).get('who');
-  const deep = { souto: diegoSouto, cutcsa: agustinCutcsa, highlands: agustinHighlands, pais: lucasPais, molde: lucas };
+  const deep = { souto: diegoSouto, cutcsa: agustinCutcsa, highlands: agustinHighlands, pais: lucasPais, molde: lucas, bet: lucasBet, burbuja: ruibalBurbuja };
   if (who && FRIENDS.some((f) => f.id === who)) start(who);
   else if (who && deep[who]) deep[who]();
 })();
