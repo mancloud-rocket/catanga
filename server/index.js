@@ -22,7 +22,17 @@ app.get('/amigos', (_req, res) => {
 });
 
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  // Recuperacion nativa de estado (Socket.IO 4.6+): si un cliente se corta
+  // menos de 2 minutos, al volver recibe los eventos que se perdio, en orden.
+  connectionStateRecovery: {
+    maxDisconnectionDuration: 2 * 60 * 1000,
+    skipMiddlewares: true,
+  },
+  // Heartbeats mas agresivos: detectar celulares muertos en ~15s, no en 45s.
+  pingInterval: 10000,
+  pingTimeout: 15000,
+});
 
 // code -> { code, players: [{ token, name, sockets, connected }], hostToken, game }
 const rooms = new Map();
@@ -69,13 +79,28 @@ function broadcastLobby(room) {
   }
 }
 
+// Estado personalizado + metadatos de sincronizacion. El tablero es estatico:
+// solo viaja en los envios "full" (join, getState, sync); los broadcasts por
+// accion van livianos y el cliente lo completa desde su cache.
+function personalState(room, i, full) {
+  const state = room.game.serialize(i);
+  state.retiredSeats = [...room.retiredSeats];
+  state.gameId = room.gameId;
+  state.seq = room.seq;
+  if (!full) delete state.board;
+  return state;
+}
+
 function broadcastGame(room) {
   if (!room.game) return;
+  room.seq++;
   room.players.forEach((p, i) => {
-    const state = room.game.serialize(i);
-    state.retiredSeats = [...room.retiredSeats];
-    emitToPlayer(p, 'gameState', state);
+    emitToPlayer(p, 'gameState', personalState(room, i, false));
   });
+}
+
+function sendFullState(room, socket, i) {
+  socket.emit('gameState', personalState(room, i, true));
 }
 
 // ---------- Autopiloto para asientos retirados ----------
@@ -184,7 +209,17 @@ const ACTIONS = {
 io.on('connection', (socket) => {
   let myRoom = null;
   let myToken = null;
-  log(`socket conectado ${socket.id}`);
+  log(`socket conectado ${socket.id}${socket.recovered ? ' (estado recuperado)' : ''}`);
+
+  // anti-flood: ventana deslizante simple por socket (configurable en tests)
+  const RATE_LIMIT = Number(process.env.CATAN_RATE_LIMIT) || 40;
+  let evCount = 0;
+  let evWindowStart = Date.now();
+  function allowEvent() {
+    const now = Date.now();
+    if (now - evWindowStart > 5000) { evWindowStart = now; evCount = 0; }
+    return ++evCount <= RATE_LIMIT;
+  }
 
   const myIdx = () => (myRoom ? myRoom.players.findIndex((p) => p.token === myToken) : -1);
 
@@ -192,7 +227,7 @@ io.on('connection', (socket) => {
     name = String(name || '').trim().slice(0, 16) || 'Jugador';
     const code = makeCode();
     const token = crypto.randomUUID();
-    const room = { code, players: [{ token, name, sockets: [socket.id], connected: true }], hostToken: token, game: null, retiredSeats: new Set() };
+    const room = { code, players: [{ token, name, sockets: [socket.id], connected: true }], hostToken: token, game: null, retiredSeats: new Set(), gameId: null, seq: 0 };
     rooms.set(code, room);
     myRoom = room;
     myToken = token;
@@ -221,10 +256,10 @@ io.on('connection', (socket) => {
           if (room.game) room.game._log(`${existing.name} se arrepintio y volvio a la partida.`);
           log(`sala ${code}: ${existing.name} volvio (asiento ${seatIdx})`);
         }
-        log(`sala ${code}: ${existing.name} reconecta (${socket.id}), sockets activos: ${existing.sockets.length}`);
+        log(`sala ${code}: ${existing.name} reconecta (${socket.id}, recovered=${socket.recovered === true}), sockets activos: ${existing.sockets.length}`);
         cb({ ok: true, code, token, idx: seatIdx, started: !!room.game });
         broadcastLobby(room);
-        if (room.game) broadcastGame(room);
+        if (room.game) sendFullState(room, socket, seatIdx);
         return;
       }
     }
@@ -249,7 +284,8 @@ io.on('connection', (socket) => {
       log(`sala ${code}: ${name} tomo el asiento ${freeIdx} (era de ${oldName})`);
       cb({ ok: true, code, token: newToken, idx: freeIdx, started: true });
       broadcastLobby(room);
-      broadcastGame(room);
+      sendFullState(room, socket, freeIdx); // el nuevo necesita el tablero
+      broadcastGame(room);                  // el resto, el cambio de nombre
       return;
     }
     if (room.players.length >= 4) return cb({ ok: false, error: 'La sala esta llena (max 4).' });
@@ -273,13 +309,20 @@ io.on('connection', (socket) => {
       [myRoom.players[i], myRoom.players[j]] = [myRoom.players[j], myRoom.players[i]];
     }
     myRoom.game = new Game(myRoom.players.map((p) => p.name));
+    myRoom.gameId = crypto.randomUUID();
+    myRoom.seq = 0;
     log(`sala ${myRoom.code}: partida iniciada con ${myRoom.players.map((p) => p.name).join(', ')}`);
     cb && cb({ ok: true });
     broadcastLobby(myRoom);
-    broadcastGame(myRoom);
+    // arranque: todos necesitan el estado completo con tablero
+    myRoom.seq++;
+    myRoom.players.forEach((p, i) => {
+      emitToPlayer(p, 'gameState', personalState(myRoom, i, true));
+    });
   });
 
   socket.on('action', (action, cb) => {
+    if (!allowEvent()) return cb && cb({ ok: false, error: 'Tranquilo, bo. Demasiadas acciones seguidas.' });
     const idx = myIdx();
     if (!myRoom || !myRoom.game || idx === -1) return cb && cb({ ok: false, error: 'No estas en una partida.' });
     const fn = ACTIONS[action && action.type];
@@ -317,6 +360,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('chat', (msg) => {
+    if (!allowEvent()) return;
     const idx = myIdx();
     if (!myRoom || idx === -1) return;
     const text = String(msg || '').slice(0, 200);
@@ -330,11 +374,22 @@ io.on('connection', (socket) => {
   socket.on('getState', (cb) => {
     const idx = myIdx();
     if (!myRoom || idx === -1 || typeof cb !== 'function') return cb && cb({ ok: false });
-    if (myRoom.game) {
-      const state = myRoom.game.serialize(idx);
-      state.retiredSeats = [...myRoom.retiredSeats];
-      cb({ ok: true, state });
-    } else cb({ ok: true, lobby: true });
+    if (myRoom.game) cb({ ok: true, state: personalState(myRoom, idx, true) });
+    else cb({ ok: true, lobby: true });
+  });
+
+  // Watchdog de sincronizacion: el cliente manda su (gameId, seq) y el server
+  // le devuelve el estado completo solo si esta atrasado.
+  socket.on('sync', (info, cb) => {
+    const idx = myIdx();
+    if (!myRoom || !myRoom.game || idx === -1 || typeof cb !== 'function') return cb && cb({ ok: false });
+    const clientSeq = info && Number(info.seq) || 0;
+    if (!info || info.gameId !== myRoom.gameId || clientSeq < myRoom.seq) {
+      log(`sala ${myRoom.code}: resync de ${myRoom.players[idx].name} (cliente seq ${clientSeq}, server seq ${myRoom.seq})`);
+      cb({ ok: true, resync: personalState(myRoom, idx, true) });
+    } else {
+      cb({ ok: true });
+    }
   });
 
   socket.on('leaveRoom', () => {

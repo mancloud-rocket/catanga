@@ -132,6 +132,9 @@ window.io = function () {
     on: (ev, fn) => { (handlers[ev] = handlers[ev] || []).push(fn); },
     once: (ev, fn) => { const w = (d) => { fn(d); handlers[ev] = handlers[ev].filter((x) => x !== w); }; (handlers[ev] = handlers[ev] || []).push(w); },
     emit: (ev, payload, cb) => { const done = typeof payload === 'function' ? payload : cb; if (done) done({ ok: true }); },
+    timeout: () => ({ emit: (ev, payload, cb) => { if (cb) cb(null, { ok: true }); } }),
+    connected: true,
+    listeners: (ev) => handlers[ev] || [],
     _fire: (ev, data) => (handlers[ev] || []).forEach((f) => f(data)),
   };
   return window.__sock;

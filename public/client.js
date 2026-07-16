@@ -4,7 +4,14 @@
 (function () {
   'use strict';
 
-  const socket = io();
+  const socket = io({
+    // reconexion incansable con backoff, y timeout de conexion corto
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 500,
+    reconnectionDelayMax: 4000,
+    timeout: 8000,
+  });
 
   const RES = ['wood', 'brick', 'sheep', 'wheat', 'ore'];
   const RES_NAME = { wood: 'Madera', brick: 'Ladrillo', sheep: 'Oveja', wheat: 'Trigo', ore: 'Mineral' };
@@ -62,10 +69,24 @@
   // ---------- Acciones ----------
 
   function act(action, cb) {
-    socket.emit('action', action, (res) => {
-      if (!res.ok) toast(res.error || 'Accion invalida');
+    const handle = (res) => {
+      if (!res || !res.ok) toast((res && res.error) || 'Accion invalida');
       else if (cb) cb();
-    });
+    };
+    // ack con timeout: si el server no responde en 6s (conexion caida a mitad
+    // de la accion), avisamos y resincronizamos en vez de colgar la UI
+    if (typeof socket.timeout === 'function') {
+      socket.timeout(6000).emit('action', action, (err, res) => {
+        if (err) {
+          toast('Conexion inestable: resincronizando...');
+          refreshState();
+          return;
+        }
+        handle(res);
+      });
+    } else {
+      socket.emit('action', action, handle);
+    }
   }
 
   // ---------- Home ----------
@@ -129,11 +150,7 @@
   function refreshState() {
     if (!socket.connected) return;
     socket.emit('getState', (res) => {
-      if (res && res.ok && res.state) {
-        state = res.state;
-        showScreen('game');
-        render();
-      }
+      if (res && res.ok && res.state) applyGameState(res.state);
     });
   }
 
@@ -150,7 +167,16 @@
     if (sess && sess.code) {
       socket.emit('joinRoom', { code: sess.code, name: sess.name, token: sess.token }, (res) => {
         if (res.ok) showScreen(res.started ? 'game' : 'lobby');
-        else { clearSession(); if (urlCode) $('input-code').value = urlCode; }
+        else {
+          clearSession();
+          if (state) {
+            // estabamos jugando y la sala ya no existe (server reiniciado)
+            state = null;
+            toast('El server se reinicio y la sala ya no existe. Armen otra, gurises.');
+            showScreen('home');
+          }
+          if (urlCode) $('input-code').value = urlCode;
+        }
       });
     } else if (urlCode) {
       $('input-code').value = urlCode.toUpperCase();
@@ -183,7 +209,27 @@
 
   // ---------- Estado de juego ----------
 
-  socket.on('gameState', (gs) => {
+  // Sincronizacion robusta: el tablero llega una sola vez y se cachea por
+  // gameId; los broadcasts por accion vienen livianos. seq descarta estados
+  // viejos que puedan llegar tarde por otro socket.
+  let boardCache = { gameId: null, board: null };
+  let lastSeq = -1;
+  let lastGameId = null;
+
+  function applyGameState(gs) {
+    if (gs.gameId !== undefined) {
+      if (gs.gameId !== lastGameId) { lastGameId = gs.gameId; lastSeq = -1; }
+      if (gs.seq !== undefined && gs.seq <= lastSeq) return; // estado viejo, descartar
+    }
+    if (gs.board) {
+      boardCache = { gameId: gs.gameId, board: gs.board };
+    } else if (boardCache.board && boardCache.gameId === gs.gameId) {
+      gs.board = boardCache.board;
+    } else {
+      refreshState(); // no tengo el tablero de esta partida: pedir completo (sin marcar seq)
+      return;
+    }
+    if (gs.gameId !== undefined && gs.seq !== undefined) lastSeq = gs.seq;
     const prevDice = state ? state.dice : null;
     state = gs;
     showScreen('game');
@@ -193,7 +239,18 @@
     }
     render();
     if (lastDice) lastDice.fresh = false;
-  });
+  }
+
+  socket.on('gameState', applyGameState);
+
+  // Watchdog: cada 12s pregunta al server si estamos atrasados; si el server
+  // tiene un seq mayor, devuelve el estado completo y nos realineamos.
+  setInterval(() => {
+    if (!socket.connected || !state || state.winner !== null) return;
+    socket.emit('sync', { gameId: lastGameId, seq: lastSeq }, (res) => {
+      if (res && res.resync) applyGameState(res.resync);
+    });
+  }, 12000);
 
   // Banner cinematico para momentos dramaticos (se crea on-demand, fuera del re-render)
   function bigMoment(text, sub) {

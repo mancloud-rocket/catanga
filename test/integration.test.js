@@ -3,6 +3,7 @@
 // completa con 3 clientes socket.io, tomando siempre jugadas legales.
 
 process.env.PORT = 3199;
+process.env.CATAN_RATE_LIMIT = 100000; // los bots del test disparan mas rapido que un humano
 require('../server/index');
 const { io } = require('socket.io-client');
 const assert = require('assert');
@@ -66,6 +67,11 @@ async function main() {
   // Manos ocultas entre jugadores
   const otherSeat = states[0].players.findIndex((_, idx) => idx !== states[0].you);
   assert.ok(states[0].players[otherSeat].resources === undefined, 'mano rival oculta para Ana');
+
+  // Metadatos de sincronizacion: el arranque es un estado completo
+  assert.ok(typeof states[0].gameId === 'string', 'gameId presente');
+  assert.ok(states[0].seq >= 1, 'seq presente');
+  assert.ok(states[0].board, 'estado inicial completo con tablero');
 
   // --- Juego automatico: cada cliente juega su jugada legal cuando le toca ---
   async function playStep() {
@@ -148,6 +154,15 @@ async function main() {
     assert.strictEqual(st.turn, states[0].turn, 'turn consistente');
     assert.strictEqual(st.winner, states[0].winner, 'winner consistente');
   }
+
+  // Broadcasts por accion viajan livianos (sin tablero)
+  assert.strictEqual(states[0].board, undefined, 'broadcast liviano sin tablero');
+
+  // sync: con seq atrasado devuelve estado completo; al dia, no manda nada
+  const syncStale = await new Promise((res) => a.emit('sync', { gameId: states[0].gameId, seq: 0 }, res));
+  assert.ok(syncStale.resync && syncStale.resync.board, 'resync trae estado completo con tablero');
+  const syncFresh = await new Promise((res) => a.emit('sync', { gameId: states[0].gameId, seq: syncStale.resync.seq }, res));
+  assert.ok(syncFresh.ok && !syncFresh.resync, 'al dia: sin resync');
 
   // --- Reconexion: Beto se cae y vuelve con su token ---
   const tokenB = jb.token;
@@ -249,8 +264,14 @@ async function main() {
   while (st2s[1].turn !== elsaSeat && vueltas++ < 20) await new Promise((r) => setTimeout(r, 100));
   assert.strictEqual(st2s[1].turn, elsaSeat, 'el turno no queda trabado en la retirada');
   const logAntes = st2s[1].log.length;
+  vueltas = 0;
   while (st2s[1].turn === elsaSeat && st2s[1].winner === null && vueltas++ < 30) await actElsa();
-  await new Promise((r) => setTimeout(r, 500));
+  // Dora (retirada) juega sola; si su 7 obliga a Elsa a descartar, Elsa cumple
+  vueltas = 0;
+  while (st2s[1].turn !== elsaSeat && st2s[1].winner === null && vueltas++ < 40) {
+    if (st2s[1].subPhase === 'discard' && st2s[1].pendingDiscards[elsaSeat]) await actElsa();
+    else await new Promise((r) => setTimeout(r, 100));
+  }
   assert.strictEqual(st2s[1].turn, elsaSeat, 'Dora auto-paso su turno y volvio a Elsa');
   assert.ok(st2s[1].log.length > logAntes, 'hubo actividad del autopiloto');
 
