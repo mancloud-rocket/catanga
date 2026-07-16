@@ -284,6 +284,49 @@ input[type="text"]:focus { border-color: var(--red-catan); }
 .res-ore   { background: linear-gradient(180deg, #7e8a94, #566068); }
 
 .my-devcards { display: flex; gap: 5px; align-items: flex-end; }
+
+/* Pill de reconexion */
+#conn-pill {
+  position: fixed; top: 14px; left: 50%; transform: translateX(-50%) translateY(-60px);
+  z-index: 200;
+  background: #a32c22; color: #ffe9b0;
+  font-weight: 900; font-size: 14px;
+  padding: 8px 22px; border-radius: 999px;
+  border: 2px solid #6d1a12;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+  transition: transform 0.3s ease;
+  pointer-events: none;
+}
+#conn-pill.show { transform: translateX(-50%) translateY(0); animation: connPulse 1.2s ease-in-out infinite; }
+@keyframes connPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.65; } }
+
+/* Tooltip de cartas de desarrollo */
+.dev-card { position: relative; }
+.dev-card[data-desc]:hover::after {
+  content: attr(data-desc);
+  position: absolute; bottom: calc(100% + 10px); left: 50%;
+  transform: translateX(-50%);
+  width: 230px;
+  background: rgba(30, 18, 8, 0.96);
+  color: #ffe9b0;
+  border: 1px solid #8a6534;
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 12px; font-weight: normal; line-height: 1.45; text-align: left;
+  white-space: normal;
+  z-index: 90;
+  pointer-events: none;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+.dev-card[data-desc]:hover::before {
+  content: '';
+  position: absolute; bottom: calc(100% + 4px); left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: rgba(30, 18, 8, 0.96);
+  z-index: 91;
+  pointer-events: none;
+}
 .dev-card {
   width: 52px; height: 78px;
   border-radius: 7px;

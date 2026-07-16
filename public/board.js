@@ -293,16 +293,34 @@
     });
   }
 
+  // Ciudad: claramente mas grande que el poblado, con torre y banderin dorado
   function cityShape(v, color) {
     const x = v.x * S, y = v.y * S;
-    return el('path', {
-      d: `M ${x - 11} ${y + 8} L ${x - 11} ${y - 2} L ${x - 4} ${y - 2} L ${x - 4} ${y - 8}
-          L ${x + 1} ${y - 14} L ${x + 6} ${y - 8} L ${x + 6} ${y - 2} L ${x + 11} ${y - 2}
-          L ${x + 11} ${y + 8} Z`,
-      fill: color, stroke: 'rgba(0,0,0,0.6)', 'stroke-width': 1.8,
+    const g = el('g', {});
+    g.appendChild(el('path', {
+      d: `M ${x - 13} ${y + 9} L ${x - 13} ${y - 3} L ${x - 6} ${y - 3} L ${x - 6} ${y - 12}
+          L ${x - 1} ${y - 18} L ${x + 4} ${y - 12} L ${x + 4} ${y - 3} L ${x + 13} ${y - 3}
+          L ${x + 13} ${y + 9} Z`,
+      fill: color, stroke: 'rgba(0,0,0,0.65)', 'stroke-width': 2,
       'stroke-linejoin': 'round',
       filter: 'url(#pieceShadow)',
-    });
+    }));
+    // ventana para dar lectura de "edificio"
+    g.appendChild(el('rect', {
+      x: x + 5.5, y: y - 0.5, width: 5, height: 5.5, rx: 1,
+      fill: 'rgba(0,0,0,0.35)',
+    }));
+    // banderin dorado en la torre
+    g.appendChild(el('line', {
+      x1: x - 1, y1: y - 18, x2: x - 1, y2: y - 25,
+      stroke: 'rgba(0,0,0,0.7)', 'stroke-width': 1.6,
+    }));
+    g.appendChild(el('path', {
+      d: `M ${x - 1} ${y - 25} L ${x + 7.5} ${y - 22.5} L ${x - 1} ${y - 20} Z`,
+      fill: '#e8b64c', stroke: 'rgba(0,0,0,0.6)', 'stroke-width': 1.2,
+      'stroke-linejoin': 'round',
+    }));
+    return g;
   }
 
   // ---------- Render principal ----------

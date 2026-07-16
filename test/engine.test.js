@@ -336,4 +336,24 @@ function resolveToMain(g) {
   assert.ok(g.offerTrade(0, { wood: 3 }, { ore: 1 }).ok, 'oferta valida ok');
 }
 
+// --- Trades: la oferta muere cuando todos rechazan y se puede reofertar ---
+{
+  const g = new Game(['Ana', 'Beto', 'Caro'], mulberry32(31));
+  autoSetup(g);
+  g.rollDice(0); resolveToMain(g);
+  g.players[0].resources = { wood: 3, brick: 0, sheep: 0, wheat: 0, ore: 0 };
+
+  assert.ok(g.offerTrade(0, { wood: 1 }, { ore: 1 }).ok);
+  assert.ok(g.respondTrade(1, false).ok);
+  assert.ok(g.tradeOffer !== null, 'con un solo rechazo sigue viva');
+  assert.ok(g.respondTrade(2, false).ok);
+  assert.strictEqual(g.tradeOffer, null, 'muere sola cuando todos rechazan');
+
+  // reoferta inmediata sin tener que retirar nada
+  assert.ok(g.offerTrade(0, { wood: 2 }, { wheat: 1 }).ok, 'puede ofertar de nuevo');
+  // y una oferta nueva reemplaza a la propia anterior
+  assert.ok(g.offerTrade(0, { wood: 1 }, { sheep: 1 }).ok, 'reemplaza su propia oferta');
+  assert.strictEqual(g.tradeOffer.get.sheep, 1, 'quedo la ultima');
+}
+
 console.log('engine.test.js OK');

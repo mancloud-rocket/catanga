@@ -9,6 +9,7 @@ const crypto = require('crypto');
 const express = require('express');
 const { Server } = require('socket.io');
 const { Game } = require('./game/engine');
+const R = require('./game/rules');
 
 const PORT = process.env.PORT || 3000;
 
@@ -23,8 +24,12 @@ app.get('/amigos', (_req, res) => {
 const server = http.createServer(app);
 const io = new Server(server);
 
-// code -> { code, players: [{ token, name, socketId, connected }], hostToken, game }
+// code -> { code, players: [{ token, name, sockets, connected }], hostToken, game }
 const rooms = new Map();
+
+function log(...args) {
+  console.log(new Date().toISOString(), '|', ...args);
+}
 
 function makeCode() {
   const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // sin I ni O para evitar confusiones
@@ -48,9 +53,15 @@ function lobbyView(room) {
   };
 }
 
+// Cada jugador puede tener VARIOS sockets vivos (dos pestañas, o el socket
+// viejo de un celular que todavia no hizo timeout). Se emite a todos.
+function emitToPlayer(p, event, payload) {
+  for (const sid of p.sockets) io.to(sid).emit(event, payload);
+}
+
 function broadcastLobby(room) {
   for (const p of room.players) {
-    if (p.socketId) io.to(p.socketId).emit('roomUpdate', {
+    emitToPlayer(p, 'roomUpdate', {
       ...lobbyView(room),
       youIdx: room.players.indexOf(p),
       youAreHost: p.token === room.hostToken,
@@ -61,10 +72,88 @@ function broadcastLobby(room) {
 function broadcastGame(room) {
   if (!room.game) return;
   room.players.forEach((p, i) => {
-    if (p.socketId && p.connected) {
-      io.to(p.socketId).emit('gameState', room.game.serialize(i));
-    }
+    const state = room.game.serialize(i);
+    state.retiredSeats = [...room.retiredSeats];
+    emitToPlayer(p, 'gameState', state);
   });
+}
+
+// ---------- Autopiloto para asientos retirados ----------
+// Juega lo minimo para que la partida nunca se trabe: tira dados, descarta,
+// mueve al ladron y pasa el turno. No construye ni comercia.
+
+function autoStep(g) {
+  const p = g.turn;
+  if (g.phase === 'setup') {
+    if (g.setupExpecting === 'settlement') {
+      const v = g.board.vertices.find((vv) => R.respectsDistanceRule(g.board, g.players, vv.id));
+      return v ? g.placeSetupSettlement(p, v.id) : { ok: false };
+    }
+    const e = g.board.vertices[g.lastSetupVertex].edges.find((ee) => R.roadAt(g.players, ee) === null);
+    return e !== undefined ? g.placeSetupRoad(p, e) : { ok: false };
+  }
+  if (g.subPhase === 'roll') return g.rollDice(p);
+  if (g.subPhase === 'robber') {
+    const hex = g.board.hexes.find((h) => h.id !== g.robberHex);
+    return g.moveRobber(p, hex.id);
+  }
+  if (g.subPhase === 'steal') return g.stealFrom(p, g.stealCandidates[0]);
+  if (g.subPhase === 'freeRoads') {
+    const edge = g.board.edges.find((e) => R.canPlaceRoad(g.board, g.players, p, e.id));
+    if (edge) return g.placeFreeRoad(p, edge.id);
+    g.freeRoadsLeft = 0;
+    g.subPhase = 'main';
+    return { ok: true };
+  }
+  if (g.subPhase === 'main') return g.endTurn(p);
+  return { ok: false };
+}
+
+function greedyDiscardFor(g, idx) {
+  const pl = g.players[idx];
+  const hand = {};
+  let left = g.pendingDiscards[idx];
+  for (const r of ['wood', 'brick', 'sheep', 'wheat', 'ore']) {
+    const take = Math.min(left, pl.resources[r]);
+    if (take > 0) { hand[r] = take; left -= take; }
+  }
+  return g.discard(idx, hand);
+}
+
+function pumpAutoplay(room) {
+  const g = room.game;
+  if (!g || room.retiredSeats.size === 0) return;
+  let acted = false;
+  let guard = 0;
+
+  while (g.winner === null && guard++ < 80) {
+    // descartes pendientes de retirados (pueden deber cartas en turno ajeno)
+    if (g.subPhase === 'discard') {
+      const pend = Object.keys(g.pendingDiscards).map(Number).filter((i) => room.retiredSeats.has(i));
+      if (pend.length > 0) {
+        for (const idx of pend) greedyDiscardFor(g, idx);
+        acted = true;
+        continue;
+      }
+    }
+    if (!room.retiredSeats.has(g.turn)) break;
+    const res = autoStep(g);
+    if (!res || !res.ok) break;
+    acted = true;
+  }
+
+  // los retirados rechazan ofertas automaticamente
+  if (g.winner === null && g.tradeOffer) {
+    for (const idx of [...room.retiredSeats]) {
+      if (!g.tradeOffer) break;
+      if (idx !== g.tradeOffer.from && !g.tradeOffer.responses[idx]) {
+        g.respondTrade(idx, false);
+        acted = true;
+      }
+    }
+  }
+
+  if (acted) broadcastGame(room);
 }
 
 // Mapa de acciones del cliente a metodos del motor.
@@ -95,6 +184,7 @@ const ACTIONS = {
 io.on('connection', (socket) => {
   let myRoom = null;
   let myToken = null;
+  log(`socket conectado ${socket.id}`);
 
   const myIdx = () => (myRoom ? myRoom.players.findIndex((p) => p.token === myToken) : -1);
 
@@ -102,10 +192,11 @@ io.on('connection', (socket) => {
     name = String(name || '').trim().slice(0, 16) || 'Jugador';
     const code = makeCode();
     const token = crypto.randomUUID();
-    const room = { code, players: [{ token, name, socketId: socket.id, connected: true }], hostToken: token, game: null };
+    const room = { code, players: [{ token, name, sockets: [socket.id], connected: true }], hostToken: token, game: null, retiredSeats: new Set() };
     rooms.set(code, room);
     myRoom = room;
     myToken = token;
+    log(`sala ${code} creada por ${name} (${socket.id})`);
     cb({ ok: true, code, token, idx: 0 });
     broadcastLobby(room);
   });
@@ -115,26 +206,56 @@ io.on('connection', (socket) => {
     const room = rooms.get(code);
     if (!room) return cb({ ok: false, error: 'No existe esa sala.' });
 
-    // Reconexion con token existente
+    // Reconexion con token existente (suma el socket nuevo sin pisar otros)
     if (token) {
       const existing = room.players.find((p) => p.token === token);
       if (existing) {
-        existing.socketId = socket.id;
+        if (!existing.sockets.includes(socket.id)) existing.sockets.push(socket.id);
         existing.connected = true;
         myRoom = room;
         myToken = token;
-        cb({ ok: true, code, token, idx: room.players.indexOf(existing), started: !!room.game });
+        // si se habia retirado y nadie tomo su lugar, vuelve a la partida
+        const seatIdx = room.players.indexOf(existing);
+        if (room.retiredSeats.has(seatIdx)) {
+          room.retiredSeats.delete(seatIdx);
+          if (room.game) room.game._log(`${existing.name} se arrepintio y volvio a la partida.`);
+          log(`sala ${code}: ${existing.name} volvio (asiento ${seatIdx})`);
+        }
+        log(`sala ${code}: ${existing.name} reconecta (${socket.id}), sockets activos: ${existing.sockets.length}`);
+        cb({ ok: true, code, token, idx: seatIdx, started: !!room.game });
         broadcastLobby(room);
         if (room.game) broadcastGame(room);
         return;
       }
     }
 
-    if (room.game) return cb({ ok: false, error: 'La partida ya empezo.' });
+    // Partida empezada: solo se puede entrar tomando un asiento retirado
+    if (room.game) {
+      const freeIdx = [...room.retiredSeats][0];
+      if (freeIdx === undefined) return cb({ ok: false, error: 'La partida ya empezo y no hay lugares libres.' });
+      const seat = room.players[freeIdx];
+      const oldName = room.game.players[freeIdx].name;
+      name = String(name || '').trim().slice(0, 16) || 'Jugador';
+      const newToken = crypto.randomUUID();
+      seat.token = newToken;
+      seat.name = name;
+      seat.sockets = [socket.id];
+      seat.connected = true;
+      room.retiredSeats.delete(freeIdx);
+      room.game.players[freeIdx].name = name; // hereda piezas, recursos y cartas
+      room.game._log(`${name} toma el lugar de ${oldName}. Hereda todo lo suyo.`);
+      myRoom = room;
+      myToken = newToken;
+      log(`sala ${code}: ${name} tomo el asiento ${freeIdx} (era de ${oldName})`);
+      cb({ ok: true, code, token: newToken, idx: freeIdx, started: true });
+      broadcastLobby(room);
+      broadcastGame(room);
+      return;
+    }
     if (room.players.length >= 4) return cb({ ok: false, error: 'La sala esta llena (max 4).' });
     name = String(name || '').trim().slice(0, 16) || `Jugador ${room.players.length + 1}`;
     const newToken = crypto.randomUUID();
-    room.players.push({ token: newToken, name, socketId: socket.id, connected: true });
+    room.players.push({ token: newToken, name, sockets: [socket.id], connected: true });
     myRoom = room;
     myToken = newToken;
     cb({ ok: true, code, token: newToken, idx: room.players.length - 1 });
@@ -152,6 +273,7 @@ io.on('connection', (socket) => {
       [myRoom.players[i], myRoom.players[j]] = [myRoom.players[j], myRoom.players[i]];
     }
     myRoom.game = new Game(myRoom.players.map((p) => p.name));
+    log(`sala ${myRoom.code}: partida iniciada con ${myRoom.players.map((p) => p.name).join(', ')}`);
     cb && cb({ ok: true });
     broadcastLobby(myRoom);
     broadcastGame(myRoom);
@@ -170,7 +292,28 @@ io.on('connection', (socket) => {
       result = { ok: false, error: 'Error interno del server.' };
     }
     cb && cb(result);
-    if (result.ok) broadcastGame(myRoom);
+    if (result.ok) {
+      broadcastGame(myRoom);
+      pumpAutoplay(myRoom); // por si el turno cayo en un asiento retirado
+      if (myRoom.game.winner !== null && !myRoom.winnerLogged) {
+        myRoom.winnerLogged = true;
+        log(`sala ${myRoom.code}: gana ${myRoom.game.players[myRoom.game.winner].name}`);
+      }
+    }
+  });
+
+  // Retirarse: el asiento queda libre y el autopiloto lo mantiene vivo
+  socket.on('retire', (cb) => {
+    const idx = myIdx();
+    if (!myRoom || !myRoom.game || idx === -1) return cb && cb({ ok: false, error: 'No estas en una partida.' });
+    if (myRoom.game.winner !== null) return cb && cb({ ok: false, error: 'La partida ya termino.' });
+    if (myRoom.retiredSeats.has(idx)) return cb && cb({ ok: false, error: 'Ya te diste.' });
+    myRoom.retiredSeats.add(idx);
+    myRoom.game._log(`${myRoom.game.players[idx].name} se retira. Su lugar queda libre: entra con el codigo ${myRoom.code}.`);
+    log(`sala ${myRoom.code}: ${myRoom.game.players[idx].name} se retiro (asiento ${idx})`);
+    cb && cb({ ok: true });
+    broadcastGame(myRoom);
+    pumpAutoplay(myRoom);
   });
 
   socket.on('chat', (msg) => {
@@ -179,10 +322,19 @@ io.on('connection', (socket) => {
     const text = String(msg || '').slice(0, 200);
     if (!text.trim()) return;
     for (const p of myRoom.players) {
-      if (p.socketId && p.connected) {
-        io.to(p.socketId).emit('chat', { from: myRoom.players[idx].name, idx, text });
-      }
+      emitToPlayer(p, 'chat', { from: myRoom.players[idx].name, idx, text });
     }
+  });
+
+  // Refresco de estado bajo demanda (al volver de background, tras reconectar)
+  socket.on('getState', (cb) => {
+    const idx = myIdx();
+    if (!myRoom || idx === -1 || typeof cb !== 'function') return cb && cb({ ok: false });
+    if (myRoom.game) {
+      const state = myRoom.game.serialize(idx);
+      state.retiredSeats = [...myRoom.retiredSeats];
+      cb({ ok: true, state });
+    } else cb({ ok: true, lobby: true });
   });
 
   socket.on('leaveRoom', () => {
@@ -206,8 +358,11 @@ io.on('connection', (socket) => {
     if (!myRoom) return;
     const p = myRoom.players.find((pl) => pl.token === myToken);
     if (p) {
-      p.connected = false;
-      p.socketId = null;
+      // Solo remueve ESTE socket: si el jugador reconecto con otro socket
+      // (celular que desperto, otra pestaña), ese sigue vivo y recibiendo.
+      p.sockets = p.sockets.filter((sid) => sid !== socket.id);
+      p.connected = p.sockets.length > 0;
+      log(`sala ${myRoom.code}: ${p.name} perdio el socket ${socket.id}, quedan ${p.sockets.length}`);
       broadcastLobby(myRoom);
     }
     // Sala vacia sin partida: se limpia a los 10 minutos.

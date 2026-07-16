@@ -14,6 +14,13 @@
     yearOfPlenty: 'Abundancia', monopoly: 'Monopolio',
   };
   const DEV_ICON = { knight: '⚔️', victoryPoint: '🏅', roadBuilding: '🛤️', yearOfPlenty: '🎁', monopoly: '🎩' };
+  const DEV_DESC = {
+    knight: 'Move al ladron a otro hex y robale una carta a un rival de ahi. Con 3 caballeros jugados competis por el Gran Ejercito (+2 PV).',
+    victoryPoint: '1 punto de victoria oculto. Cuenta para ganar y se revela recien al llegar a 10. No se juega.',
+    roadBuilding: 'Construi 2 caminos gratis donde quieras (conectados a lo tuyo).',
+    yearOfPlenty: 'Toma 2 recursos que elijas del banco, los que quieras.',
+    monopoly: 'Elegi un recurso: TODOS los rivales te dan TODAS sus cartas de ese recurso.',
+  };
 
   let state = null;       // gameState del server
   let lobby = null;       // roomUpdate del server
@@ -108,8 +115,36 @@
     showScreen('home');
   });
 
+  // ---------- Salud de conexion ----------
+  // Pill visible cuando el socket esta caido + resincronizacion automatica
+  // al reconectar y al volver a la pestaña (celulares que se bloquean).
+
+  const connPill = document.createElement('div');
+  connPill.id = 'conn-pill';
+  connPill.textContent = '⚠ Reconectando...';
+  document.body.appendChild(connPill);
+
+  socket.on('disconnect', () => connPill.classList.add('show'));
+
+  function refreshState() {
+    if (!socket.connected) return;
+    socket.emit('getState', (res) => {
+      if (res && res.ok && res.state) {
+        state = res.state;
+        showScreen('game');
+        render();
+      }
+    });
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && state) refreshState();
+  });
+  window.addEventListener('focus', () => { if (state) refreshState(); });
+
   // Reconexion automatica: sesion guardada o ?code= en el link
   socket.on('connect', () => {
+    connPill.classList.remove('show');
     const sess = getSession();
     const urlCode = new URLSearchParams(location.search).get('code');
     if (sess && sess.code) {
@@ -245,7 +280,7 @@
         <div class="opponent ${state.turn === i ? 'current-turn' : ''}" style="border-left-color:${p.color}">
           <div class="opponent-name">
             <span class="piece-dot" style="background:${p.color}"></span>
-            ${esc(p.name)}
+            ${esc(p.name)}${(state.retiredSeats || []).includes(i) ? ' 🏳️' : ''}
             <span class="vp-badge">${p.publicVp}</span>
           </div>
           <div class="opponent-stats">
@@ -280,10 +315,18 @@
 
   function renderMyArea() {
     const p = me();
+    const meRetired = (state.retiredSeats || []).includes(state.you);
     $('my-info').innerHTML = `
       <div class="my-name"><span class="piece-dot" style="background:${p.color}"></span>${esc(p.name)}</div>
       <div class="my-vp">⭐ <b>${p.vp}</b> puntos</div>
-      <div class="my-vp">🏠 ${5 - p.settlements.length} · 🏰 ${4 - p.cities.length} · 🛤️ ${15 - p.roads.length}</div>`;
+      <div class="my-vp">🏠 ${5 - p.settlements.length} · 🏰 ${4 - p.cities.length} · 🛤️ ${15 - p.roads.length}</div>
+      ${meRetired
+        ? '<div style="font-size:12px;color:#8a6c46;font-style:italic">🏳️ Te diste. Miras de afuera.</div>'
+        : (state.winner === null && state.phase === 'play'
+          ? '<button class="btn btn-ghost" id="btn-retire" style="font-size:12px;padding:2px 8px;align-self:flex-start">🏳️ Retirarse</button>'
+          : '')}`;
+    const retireBtn = $('btn-retire');
+    if (retireBtn) retireBtn.addEventListener('click', openRetireModal);
 
     $('my-hand').innerHTML = RES.map((r) => `
       <div class="res-card res-${r}" title="${RES_NAME[r]}">
@@ -301,9 +344,10 @@
       const fresh = newDev[c] || 0;
       if (owned + fresh === 0) continue;
       const playable = owned > 0 && c !== 'victoryPoint' && canPlayDevNow();
+      const desc = DEV_DESC[c] + (fresh > 0 ? ' (Nueva: jugable recien el proximo turno.)' : '');
       devHtml += `
         <div class="dev-card ${playable ? '' : 'disabled'} ${fresh > 0 && owned === 0 ? 'new-card' : ''}"
-             data-card="${c}" title="${DEV_NAME[c]}${fresh > 0 ? ' (nueva: jugable el proximo turno)' : ''}">
+             data-card="${c}" data-desc="${desc}">
           <div class="icon">${DEV_ICON[c]}</div>
           <div class="count">${owned + fresh}</div>
           <div>${DEV_NAME[c]}</div>
@@ -330,9 +374,34 @@
     if (card === 'monopoly') return openResourcePicker('monopoly');
   }
 
+  function openRetireModal() {
+    const code = (getSession() && getSession().code) || '';
+    showModal('retire', `
+      <h2>🏳️ ¿Te das?</h2>
+      <p>Tu lugar queda <b>libre</b>: cualquiera puede entrar con el codigo <b>${esc(code)}</b>
+      y heredar tus piezas, recursos y cartas.</p>
+      <p style="margin-top:8px">Mientras nadie lo tome, el juego sigue solo (tira los dados y pasa el turno).
+      Si te arrepentis antes de que alguien entre, recargas la pagina y volves a tu asiento.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="btn-retire-no">Sigo jugando</button>
+        <button class="btn btn-primary" id="btn-retire-si">Me doy 🏳️</button>
+      </div>`);
+    $('btn-retire-no').addEventListener('click', closeModal);
+    $('btn-retire-si').addEventListener('click', () => {
+      socket.emit('retire', (res) => {
+        if (!res.ok) toast(res.error);
+        closeModal();
+      });
+    });
+  }
+
   function renderActions() {
     const box = $('actions');
     if (!state || state.winner !== null) { box.innerHTML = ''; return; }
+    if ((state.retiredSeats || []).includes(state.you)) {
+      box.innerHTML = '<span style="font-style:italic;color:#8a6c46">Espectador: tu asiento espera nuevo dueño...</span>';
+      return;
+    }
     if (!isMyTurn()) {
       box.innerHTML = `<span style="font-style:italic;color:#8a6c46">Turno de ${esc(state.players[state.turn].name)}...</span>`;
       return;

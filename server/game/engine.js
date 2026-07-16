@@ -507,7 +507,9 @@ class Game {
   offerTrade(p, give, get) {
     const e = this._requireMain(p);
     if (e) return this._err(e);
-    if (this.tradeOffer) return this._err('Ya hay una oferta activa.');
+    // Una oferta nueva reemplaza a la propia anterior (comerciar varias veces
+    // por turno es perfectamente legal).
+    if (this.tradeOffer && this.tradeOffer.from !== p) return this._err('Hay una oferta de otro jugador activa.');
     const clean = (h) => {
       const out = {};
       for (const r of RESOURCES) if (h && h[r] > 0) out[r] = Math.floor(h[r]);
@@ -534,6 +536,14 @@ class Game {
     }
     this.tradeOffer.responses[p] = accept ? 'accepted' : 'rejected';
     this._log(`${this.players[p].name} ${accept ? 'acepta' : 'rechaza'} la oferta.`);
+
+    // Si TODOS los rivales rechazaron, la oferta muere sola (el oferente
+    // queda libre para ofertar de nuevo sin retirarla a mano).
+    const rejections = Object.values(this.tradeOffer.responses).filter((r) => r === 'rejected').length;
+    if (rejections === this.players.length - 1) {
+      this.tradeOffer = null;
+      this._log('Nadie acepto la oferta: queda retirada.');
+    }
     return { ok: true };
   }
 
